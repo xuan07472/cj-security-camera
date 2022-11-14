@@ -1,13 +1,12 @@
-# 《QEMU默认支持的所有开发板列表》
+# QEMU默认支持的所有开发板、芯片列表
 
 |作者|日期|
 |---|---|
 |将狼才鲸|2021-11-12|
 
-b站：[才鲸嵌入式](https://space.bilibili.com/106424039)  
-码云：[才鲸](https://gitee.com/langcai1943)  
+所属的Gitee源码和工程地址：[才鲸嵌入式 / 开源安防摄像机（嵌入式软件）](https://gitee.com/langcai1943/cj-security-camera)
 
-## 一、背景  
+## 一、QEMU相关文档  
 * QEMU官方文档  
 [《Welcome to QEMU’s documentation!》](https://www.qemu.org/docs/master/)  
 
@@ -15,9 +14,9 @@ b站：[才鲸嵌入式](https://space.bilibili.com/106424039)
 * 安装git，并 clone qemu代码，代码地址：  
 [《Gitee 极速下载 / qemu》](https://gitee.com/mirrors/qemu)  
 * QEMU源码中不包含任何开发板的可执行文件，需要针对不同的开发板用不同的编译工具生成可执行文件后再进行测试  
-* QEMU有个缺点就是没有实现任何芯片的2D显示加速、视频编解码（芯片中显卡模块的功能），可能是CPU仿这类并行计算的硬件意义不大，应该会非常慢，反而还没有直接写显存来的快。
+* QEMU有个缺点就是没有实现任何芯片的2D显示加速、视频编解码（芯片中显卡模块的功能），可能是CPU仿这类并行计算的硬件意义不大，应该会非常慢，反而还没有直接写显存来的快，唯一的例外就是树莓派，树莓派支持上述功能。
 
-## 二、开发板列表  
+## 二、QEMU支持的开发板列表  
 
 QEMU默认支持以下架构的CPU：  
 
@@ -36,9 +35,11 @@ QEMU默认支持以下架构的CPU：
    target-xtensa
 ```
 
-针对开发板的音视频编解码，显示加速暂不能模拟（要测试音视频可以将代码做成兼容跨平台的，在Linux或者Windows下直接调用硬件编解码器进行测试）。  
+* 针对开发板的音视频编解码，显示加速暂不能模拟（要测试音视频可以将代码做成兼容跨平台的，在Linux或者Windows下直接调用硬件编解码器进行测试）。  
 
-以下内容不包含通用设备，只包含特定厂商的某一款特定开发板：  
+* 以下表格不包含Intel和AMD等通用设备或者使用很少的MCU，只包含特定厂商的某一款特定开发板：  
+
+<center>表1 QEMU支持的一些常用开发板</center>
 
 |开发板|芯片|架构|核心|支持的模块|未实现的模块|编译工具|厂商|行业|
 |---|---|---|---|---|---|---|---|---|
@@ -56,22 +57,20 @@ QEMU默认支持以下架构的CPU：
 |Siemens SX1|OMAP310|arm|ARM925T|-  Texas Instruments OMAP310 System-on-chip (ARM925T core)<br/><br/>-  ROM and RAM memories (ROM firmware image can be loaded with<br/>   -pflash) V1 1 Flash of 16MB and 1 Flash of 8MB V2 1 Flash of 32MB<br/><br/>-  **On-chip LCD controller**<br/><br/>-  On-chip Real Time Clock<br/><br/>-  Secure Digital card connected to OMAP MMC/SD host<br/><br/>-  Three on-chip UARTs|/|/|TI|/|
 ||||||||||
 
-还有大概一半的设备，因为芯片不常用或者和嵌入式无关，我就没有列出来了，感兴趣的直接去qemu源码docs/system/目录中的文档进行翻阅  
+* 还有大概一半的设备，因为芯片不常用或者和嵌入式无关，我就没有列出来了，感兴趣的直接去qemu源码docs/system/目录中的文档进行翻阅  
 
-qemu的仿真主循环位于cpu-exec.c:cpu_exec函数中  
+* qemu的仿真主循环位于cpu-exec.c:cpu_exec函数中  
 
-[qemu源码分析](https://www.cnblogs.com/long123king/p/3584053.html)  
-[【系列分享】QEMU内存虚拟化源码分析](https://www.anquanke.com/post/id/86412)  
-[QEMU源码分析系列(二)](http://blog.chinaunix.net/uid-8679615-id-5710883.html)  
+* *参考网址：*
+  * [qemu源码分析](https://www.cnblogs.com/long123king/p/3584053.html)  
+  * [【系列分享】QEMU内存虚拟化源码分析](https://www.anquanke.com/post/id/86412)  
+  * [QEMU源码分析系列(二)](http://blog.chinaunix.net/uid-8679615-id-5710883.html)  
 
-
-
-## 三、所有的开发板或CPU核详细介绍的摘抄
+## 三、所有的开发板或CPU核详细介绍的英文摘抄
 
 * 原始文档在qemu源码docs/system/目录中
 
-.. toctree::
-
+```
    target-arm
    target-avr
    target-m68k
@@ -84,9 +83,11 @@ qemu的仿真主循环位于cpu-exec.c:cpu_exec函数中
    target-sparc64
    target-i386
    target-xtensa
+```
 
+### MIPS芯片
 
-### QEMU supports variety of MIPS CPU models:
+* QEMU supports variety of MIPS CPU models:
 
 Supported CPU models for MIPS32 hosts
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -757,7 +758,7 @@ The following devices are emulated:
 
 -  PL181 MultiMedia Card Interface with SD card.
 
-#### raspi 树莓派，显示，视频编解码（博通vpu），（可惜没有2D加速）
+#### raspi 树莓派，显示，2D 3D显示加速、视频编解码（博通GPU）
 
 QEMU provides models of the following Raspberry Pi boards:
 
@@ -1130,7 +1131,3 @@ Supported devices
  * Front LEDs (PCA9552 on I2C bus)
  * LPC Peripheral Controller (a subset of subdevices are supported)
  * Hash/Crypto Engine (HACE) - Hash support only. TODO: HMAC and RSA
-
-### 四、模拟树莓派
-
-QEMU好像支持树莓派的视频编解码，我需要多媒体功能，所以我只能使用树莓派。

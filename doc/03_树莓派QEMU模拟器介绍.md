@@ -1,4 +1,12 @@
-# 树莓派QEMU模拟器教程
+# 树莓派QEMU模拟器介绍
+
+|作者|将狼才鲸|
+|---|---|
+|创建日期|2022-11-14|
+
+所属的Gitee源码和工程地址：[才鲸嵌入式 / 开源安防摄像机（嵌入式软件）](https://gitee.com/langcai1943/cj-security-camera)
+
+---
 
 ## 一、树莓派QEMU模拟器介绍
 
@@ -43,7 +51,7 @@ Missing devices
  * Pulse Width Modulation (PWM)
 ```
 
-* QEMU支持的一些嵌入式设备中，树莓派支持的外设最多，甚至都支持了VideoCore firmware (property) 2D显示加速和视频编解码，这和对Intel和AMD的支持差不多了；而其它的嵌入式芯片都没有支持2D显示加速、图片编解码、视频编解码。
+* QEMU支持的一些嵌入式设备中，树莓派支持的外设最多，甚至都支持了VideoCore firmware (property) 2D 3D显示加速和视频编解码，这和对Intel和AMD的支持差不多了；而其它的嵌入式芯片都没有支持2D显示加速、图片编解码、视频编解码。
 * 因为最新的P3、P4都是64位的ARM CPU，而嵌入式一般都还只是32位的，所以我选用P2 B，博通BCM2837，ARM Cortex-A7 900M 4核32位芯片，博通VideoCore GPU模块；我需要直接魔改树莓派的底层，毕竟嵌入式需要系统移植、驱动和应用都做。
 
 * *参考网址：*
@@ -69,8 +77,3 @@ Missing devices
   * [documentation/ hardware / raspberrypi / bcm2835](https://gitee.com/jikexianfeng/documentation/tree/master/hardware/raspberrypi/bcm2835) 有外设地址介绍
   * [BCM2837](https://gitee.com/jikexianfeng/documentation/tree/master/hardware/raspberrypi/bcm2837)
   * [树莓派3B的地址映射问题堪称新手噩梦，我用几步给大家演示一下](https://www.163.com/dy/article/H4ORDIR30552Y9C8.html)
-
-## 二、使用QEMU运行树莓派2B
-
-
-

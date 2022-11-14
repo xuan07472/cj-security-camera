@@ -1,16 +1,58 @@
-有GPU的MCU芯片有RK3399、RV1126、RK3588、RK3288、Exynos4412、DM6446等
+# 项目介绍：开源安防摄像机（嵌入式软件）
 
-[RV1126/RV1109芯片 人工智能安防开发板介绍](https://blog.csdn.net/weixin_52411576/article/details/114986087)
-[CORTEX-A9三星iTOP-4412开发开发板入门嵌入式](https://blog.csdn.net/mucheni/article/details/125204333)
-[RK3399开发板](https://blog.csdn.net/Chihiro_S/article/details/105368415)
-[IMX6UL开发板 mjpg-streamer 移植实现远程监控](https://blog.csdn.net/Chihiro_S/article/details/119753233)
-[迅为RK3588开发板Linux安卓12瑞芯微ARM核心板人工智能工业AI主板](https://blog.csdn.net/mucheni/article/details/126267513)
-[安卓开发板 MTK 方案 ARM 主板定制](https://blog.csdn.net/yangyang__z/article/details/126404411)
-[海思Hi3518EV200+4G+RS232视频监控摄像开发板防雷防静电推荐图](https://blog.csdn.net/shanghaileimao/article/details/116229998)
-[DM6446数字视频开发板](https://blog.csdn.net/weixin_33694172/article/details/93359406)
-[andoird TV 优化学习笔记](https://blog.csdn.net/qw85525006/article/details/103220708) 3.1 基础知识：相关芯片厂商介绍
+|作者|将狼才鲸|
+|---|---|
+|创建日期|2022-11-14|
 
-全志的资料不公开，放弃使用全志芯片
+* Gitee源码和工程地址：[才鲸嵌入式 / 开源安防摄像机（嵌入式软件）](https://gitee.com/langcai1943/cj-security-camera)
+* CSDN文章地址：[项目介绍：开源安防摄像机（嵌入式软件）](https://blog.csdn.net/qq582880551/article/details/127857259)
+* 注：文章中的子文档链接需在Gitee中的readme.md仓库介绍中才能点开，我设置的是相对地址，也可以在Gitee仓库的doc文件夹下手动点开。
 
-瑞芯微芯片使用的多，开发板也多，但是没有qemu模拟器，不方便随时随地写代码
+---
+
+## 一、前言
+
+1. 作为一名嵌入式软件工程师，我想自己从头开始做一个实际的嵌入式产品；结合自己工作中接触过的技术，我决定做一个带有通信、GUI、音视频编码、音视频解码功能的设备，思来想去选定了安防摄像机领域。
+
+2. 创建这个仓库的目的，一是记录自己学习到的技术，防止时间久了忘记；二是给其他也想要做一个实际嵌入式项目的人一个参考，最好是能开箱即用，能看到产品的效果，然后能方便的阅读源码和注释，知晓原理，而不用自己去一步步搭建环境；搭环境是很痛苦的，往往遇到一个问题跨不过去，又没人指导，然后就不得不放弃了。
+
+3. 我不使用具体的开发板，而是使用QEMU模拟器；原因一就是上面“第2条前言”所描述的通用和开箱即用，因为不同的开发板太多了，开发板也很贵，真的没必要让看这个工程的人还去花钱买块板子，板子买回来很大的概率也是吃灰。原因二是我自己也从来没买过开发板，也不喜欢在开发板上频繁下载调试程序，很慢也很烦，一般纯逻辑的模块我会先用gcc或者模拟器验证好，然后再上板子调试。原因三是芯片原厂开发芯片开发包时，芯片还没设计好的初期也会先使用模拟器，不过他们完整的模拟器代码并没有流传出来而已。
+
+4. 在硬件选型的过程中，其实我最中意的是瑞芯微的芯片，但无奈他们家的产品在QEMU模拟器中并不支持；然后我查看了QEMU支持的所有嵌入式芯片，发现除了树莓派、Intel、AMD，其它的芯片都不支持其中的显示加速、音视频编解码，有些芯片仅仅只支持了不加速的液晶屏显示、触摸屏、音频解码，还有些芯片只支持了串口、GPIO、SPI、I2C等基础的外设。所以没有选择，只有树莓派。
+
+5. 但树莓派也不是最完美的选项，最新的几款树莓派芯片都是64位的ARM，只能选用32位CPU的老版本；而且树莓派所使用的博通芯片的手册还是不公开的，能找到的资料也少，这对嵌入式开发很不利，但还好基本的外设寄存器地址还是能找到的，网上也能找到一些底层开发的教程；我刚毕业时也用过博通BCM2042和BCM20730蓝牙芯片，对博通也不是两眼一抹黑；尽管困难重重，但也要慢慢解决问题。
+
+6. 其它带有GPU的MCU芯片还有RK3399、RV1126、RK3588、RK3288、Exynos4412、DM6446等；全志的资料不公开，和博通一样，只面向大客户公开资料，所以也放弃使用全志芯片；海思的芯片也没找到模拟器，也就不用了。
+
+7. 一些带2D显示加速和音视频编解码模块的嵌入式开发板信息：
+  * [RV1126/RV1109芯片 人工智能安防开发板介绍](https://blog.csdn.net/weixin_52411576/article/details/114986087)
+  * [CORTEX-A9三星iTOP-4412开发开发板入门嵌入式](https://blog.csdn.net/mucheni/article/details/125204333)
+  * [RK3399开发板](https://blog.csdn.net/Chihiro_S/article/details/105368415)
+  * [IMX6UL开发板 mjpg-streamer 移植实现远程监控](https://blog.csdn.net/Chihiro_S/article/details/119753233)
+  * [迅为RK3588开发板Linux安卓12瑞芯微ARM核心板人工智能工业AI主板](https://blog.csdn.net/mucheni/article/details/126267513)
+  * [安卓开发板 MTK 方案 ARM 主板定制](https://blog.csdn.net/yangyang__z/article/details/126404411)
+  * [海思Hi3518EV200+4G+RS232视频监控摄像开发板防雷防静电推荐图](https://blog.csdn.net/shanghaileimao/article/details/116229998)
+  * [DM6446数字视频开发板](https://blog.csdn.net/weixin_33694172/article/details/93359406)
+  * [andoird TV 优化学习笔记](https://blog.csdn.net/qw85525006/article/details/103220708) 
+
+## 二、QEMU模拟器介绍
+
+* QEMU是一个硬件模拟器和仿真器，和VMware类似，能安装和运行Windows和Linux，但除此之外它还可以模拟众多的嵌入式芯片和开发板，从ARM Cortex-M3到Cortex-Axx内核都支持。
+* 你把QEMU当成一个开发板就行，编好了程序后，可以下到QEMU里面去运行。
+* 同样能模拟嵌入式硬件的还有Keil，Keil debug时选中Simulator即可。
+  * Keil模拟器的使用，详见我其它的两个仓库：
+  * [才鲸嵌入式 / 8051_c51_单片机从汇编到C_从Boot到应用实践教程](https://gitee.com/langcai1943/8051-from-boot-to-application)
+  * [才鲸嵌入式 / ARM-Cortex-M3从汇编到C_从Boot到应用教程](https://gitee.com/langcai1943/ARM-Cortex-M3_from-assembly-to-c)
+* QEMU的详细介绍详见本仓库**子文档**：
+  * [《01_QEMU仿真器-模拟器介绍.md》](./doc/01_QEMU仿真器-模拟器介绍.md)
+  * [《02_QEMU默认支持的所有开发板列表.md》](./doc/02_QEMU默认支持的所有开发板列表.md)
+
+## 三、树莓派介绍
+
+* 树莓派本质上是一个计算机，所以提供了完整的操作系统和应用软件，但是它的老款芯片是32位的ARM，也可以用于嵌入式领域。
+* 树莓派的详细介绍详见本仓库**子文档**：[《03_树莓派QEMU模拟器教程.md》](./doc/03_树莓派QEMU模拟器教程.md)
+
+## 四、开发步骤
+
+……正在进行中……
 
