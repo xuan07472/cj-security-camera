@@ -1,4 +1,4 @@
-# 项目介绍：开源安防摄像机（嵌入式软件）
+# 项目介绍：嵌入式开源项目-CJ安防摄像机
 
 |作者|将狼才鲸|
 |---|---|
@@ -13,13 +13,14 @@
 * 简介：使用ARM Cortex-A7 32位内核、带有GPU（2D 3D显示加速、图片和音频视频编解码）的博通BCM2837芯片（树莓派2B同款硬件，但不使用树莓派的系统和软件），在QEMU模拟器中运行，实现安防摄像机、音视频播放器等嵌入式设备的功能。
 
 <center>表1 本仓库软硬件资源描述</center>
+
 |**软硬件资源**|详情|备注|
 |---|---|---|
-|QEMU BCM2837芯片模拟器|900MHz 4核 ARM Cortex-A7 CPU，VideoCore IV 双核 GPU（2D 3D显示加速、视频编解码），1GB 内存，100M以太网，HDMI显示，USB2.0 x 4，SD卡，音频输出，GPIO，摄像头输入，液晶屏接口，串口，SPI，I2C等嵌入式通用模块|树莓派2B同款硬件|
-|**硬件模块测试用例：raspi3-tutorial**|包含让CPU运行的空程序、|在仓库根目录raspi3-tutorial文件夹中，开箱即用，直接make，直接在QEMU中运行|
-|**裸机工程**|……未开始……||
-|**RTOS工程**|……未开始……||
-|**Linux工程**|……未开始……||
+|QEMU BCM2837芯片模拟器|900MHz 4核 ARM Cortex-A7 CPU, VideoCore IV 双核 GPU (2D 3D显示加速, 视频编解码), 1GB 内存, 100M以太网, HDMI显示, USB2.0 x 4, SD卡, 音频输出, GPIO, 摄像头输入, 液晶屏接口, 串口, SPI, I2C等嵌入式通用模块|树莓派2B同款硬件|
+|**硬件模块测试用例：raspi3-tutorial**|裸机程序，包含让CPU运行的空程序、串口打印、屏幕图像输出、屏幕文字输出、读写SD卡、bootloader|在仓库根目录raspi3-tutorial文件夹中, 开箱即用, 直接make, 直接在QEMU中运行|
+|**裸机工程**|......未开始......||
+|**RTOS工程**|......未开始......||
+|**Linux工程**|......未开始......||
 |**使用的开源库**|||
 
 ---
@@ -277,31 +278,211 @@ Copyright (c) 2003-2022 Fabrice Bellard and the QEMU Project developers
 
 |用例名称|作用|备注|
 |---|---|---|
-|00_crosscompiler|空程序，只是为了验证编译器和模拟器安装正确，能够编译和运行||
-|01_bareminimum|||
-|02_multicorec|||
-|03_uart1|||
-|04_mailboxes|||
-|05_uart0|||
-|06_random|||
-|07_delays|||
-|08_power|||
-|09_framebuffer|||
-|0A_pcscreenfont|||
-|0B_readsector|||
-|0C_directory|||
-|0D_readfile|||
-|0E_initrd|||
-|0F_executionlevel|||
-|10_virtualmemory|||
-|11_exceptions|||
-|12_printf|||
-|13_debugger|||
-|14_raspbootin64|||
-|15_writesector|||
+|00_crosscompiler|文档，只是描述编译器相关的内容||
+|01_bareminimum|空程序，在汇编中死循环，只是为了验证编译器和模拟器安装正确，能够编译和运行||
+|02_multicorec|写汇编boot，并引导C语言main函数运行||
+|03_uart1|串口打印Hello world，从MSYS2控制台输出||
+|04_mailboxes|CPU和GPU邮箱通信，通信成功后打印串口号||
+|05_uart0|串口收发回环||
+|06_random|打印随机数||
+|07_delays|延时后打印||
+|08_power|关机与重启||
+|09_framebuffer|从屏幕显示未压缩的图片||
+|0A_pcscreenfont|从屏幕显示点阵字库文字||
+|0B_readsector|读SD卡扇区||
+|0C_directory|读SD卡文件夹||
+|0D_readfile|读SD卡文件||
+|0E_initrd|根文件系统||
+|0F_executionlevel|获取当前程序级别||
+|10_virtualmemory|MMU虚拟内存映射||
+|11_exceptions|测试异常中断||
+|12_printf|测试printf输出||
+|13_debugger|gdb调试输出||
+|14_raspbootin64|一个简单的bootloader||
+|15_writesector|写SD卡||
 
-### 1）01_bareminimum
+### 1）03_uart1
 
-* 第一个裸机程序。
-* 空程序，只是为了验证编译器和模拟器安装正确，能够编译和运行
+* 作用：串口打印Hello world，从MSYS2控制台输出
+* 效果：
 
+```shell
+jim@DESKTOP-SVP3BEM MSYS ~/raspi3-tutorial/03_uart1
+$ make
+rm kernel8.elf *.o >/dev/null 2>/dev/null || true
+aarch64-linux-gnu-gcc -Wall -O2 -ffreestanding -nostdinc -nostdlib -nostartfiles -c start.S -o start.o
+aarch64-linux-gnu-gcc -Wall -O2 -ffreestanding -nostdinc -nostdlib -nostartfiles -c main.c -o main.o
+aarch64-linux-gnu-gcc -Wall -O2 -ffreestanding -nostdinc -nostdlib -nostartfiles -c uart.c -o uart.o
+aarch64-linux-gnu-ld -nostdlib -nostartfiles start.o main.o uart.o -T link.ld -o kernel8.elf
+aarch64-linux-gnu-objcopy -O binary kernel8.elf kernel8.img
+
+jim@DESKTOP-SVP3BEM MSYS ~/raspi3-tutorial/03_uart1
+$ make run
+qemu-system-aarch64 -M raspi3b -kernel kernel8.img -serial null -serial stdio
+Hello World!
+```
+
+### 2）04_mailboxes
+
+* 作用：CPU和GPU邮箱通信，通信成功后打印串口号
+* 效果：
+
+```shell
+jim@DESKTOP-SVP3BEM MSYS ~/raspi3-tutorial/04_mailboxes
+$ make
+rm kernel8.elf *.o >/dev/null 2>/dev/null || true
+aarch64-linux-gnu-gcc -Wall -O2 -ffreestanding -nostdinc -nostdlib -nostartfiles -c start.S -o start.o
+aarch64-linux-gnu-gcc -Wall -O2 -ffreestanding -nostdinc -nostdlib -nostartfiles -c main.c -o main.o
+aarch64-linux-gnu-gcc -Wall -O2 -ffreestanding -nostdinc -nostdlib -nostartfiles -c mbox.c -o mbox.o
+aarch64-linux-gnu-gcc -Wall -O2 -ffreestanding -nostdinc -nostdlib -nostartfiles -c uart.c -o uart.o
+aarch64-linux-gnu-ld -nostdlib -nostartfiles start.o main.o mbox.o uart.o -T link.ld -o kernel8.elf
+aarch64-linux-gnu-objcopy -O binary kernel8.elf kernel8.img
+
+jim@DESKTOP-SVP3BEM MSYS ~/raspi3-tutorial/04_mailboxes
+$ make run
+qemu-system-aarch64 -M raspi3b -kernel kernel8.img -serial null -serial stdio
+My serial number is: 0000000000000000
+```
+
+### 3）05_uart0
+
+* 作用：串口收发回环（串口重定向到MSYS2命令行终端）
+* 效果：
+
+```shell
+jim@DESKTOP-SVP3BEM MSYS ~/raspi3-tutorial/05_uart0
+$ make
+rm kernel8.elf *.o >/dev/null 2>/dev/null || true
+aarch64-linux-gnu-gcc -Wall -O2 -ffreestanding -nostdinc -nostdlib -nostartfiles -c start.S -o start.o
+aarch64-linux-gnu-gcc -Wall -O2 -ffreestanding -nostdinc -nostdlib -nostartfiles -c main.c -o main.o
+aarch64-linux-gnu-gcc -Wall -O2 -ffreestanding -nostdinc -nostdlib -nostartfiles -c mbox.c -o mbox.o
+aarch64-linux-gnu-gcc -Wall -O2 -ffreestanding -nostdinc -nostdlib -nostartfiles -c uart.c -o uart.o
+aarch64-linux-gnu-ld -nostdlib -nostartfiles start.o main.o mbox.o uart.o -T link.ld -o kernel8.elf
+aarch64-linux-gnu-objcopy -O binary kernel8.elf kernel8.img
+
+jim@DESKTOP-SVP3BEM MSYS ~/raspi3-tutorial/05_uart0
+$ make run
+qemu-system-aarch64 -M raspi3b -kernel kernel8.img -serial stdio
+My serial number is: 0000000000000000
+aaaaddddd
+asdfasfsafsa
+```
+
+### 4）07_delays
+
+* 延时后打印
+
+```shell
+jim@DESKTOP-SVP3BEM MSYS ~/raspi3-tutorial/07_delays
+$ make run
+qemu-system-aarch64 -M raspi3b -kernel kernel8.img -serial stdio
+Waiting 1000000 CPU cycles (ARM CPU): OK
+Waiting 1000000 microsec (ARM CPU): OK
+Waiting 1000000 microsec (BCM System Timer): OK
+```
+
+### 5）08_power
+
+* 关机与重启
+
+```shell
+jim@DESKTOP-SVP3BEM MSYS ~/raspi3-tutorial/08_power
+$ make run
+qemu-system-aarch64 -M raspi3b -kernel kernel8.img -serial stdio
+ 1 - power off
+ 2 - reset
+Choose one: 2
+
+ 1 - power off
+ 2 - reset
+Choose one: 1
+
+ 1 - power off
+ 2 - reset
+Choose one:
+jim@DESKTOP-SVP3BEM MSYS ~/raspi3-tutorial/08_power
+```
+
+### 6）09_framebuffer
+
+* 从屏幕显示未压缩的图片
+
+![img](./picture/09_framebuffer.png)
+
+### 7）0A_pcscreenfont
+
+* 从屏幕显示点阵字库文字
+
+![img](./picture/0A_pcscreenfont.png)
+
+### 8）0F_executionlevel
+
+* 获取当前程序级别
+
+```shell
+jim@DESKTOP-SVP3BEM MSYS ~/raspi3-tutorial/0F_executionlevel
+$ jim@DESKTOP-SVP3BEM MSYS ~/raspi3-tutorial/0F_executionlevel
+$ make run
+qemu-system-aarch64 -M raspi3b -kernel kernel8.img -serial stdio
+Current EL is: 00000001
+```
+
+### 9）11_exceptions
+
+* 测试异常中断
+
+```shell
+jim@DESKTOP-SVP3BEM MSYS ~/raspi3-tutorial/11_exceptions
+$ make run
+qemu-system-aarch64 -M raspi3b -kernel kernel8.img -serial stdio
+Synchronous: Data abort, same EL, Translation fault at level 2:
+  ESR_EL1 0000000096000006 ELR_EL1 0000000000080CC4
+ SPSR_EL1 00000000200003C4 FAR_EL1 FFFFFFFFFF000000
+
+jim@DESKTOP-SVP3BEM MSYS ~/raspi3-tutorial/11_exceptions
+```
+
+### 10）12_printf
+
+* 测试printf输出
+
+```shell
+jim@DESKTOP-SVP3BEM MSYS ~/raspi3-tutorial/12_printf
+$ make run
+qemu-system-aarch64 -M raspi3b -kernel kernel8.img -serial stdio
+Hello World!
+This is character 'A', a hex number: 7FFF and in decimal: 32767
+Padding test: '00007FFF', '    -123'
+
+jim@DESKTOP-SVP3BEM MSYS ~/raspi3-tutorial/12_printf
+```
+
+### 11）13_debugger
+
+* gdb调试输出
+
+```shell
+jim@DESKTOP-SVP3BEM MSYS ~/raspi3-tutorial/13_debugger
+$ make run
+qemu-system-aarch64 -M raspi3b -kernel kernel8.img -serial stdio
+Synchronous: Breakpoint instruction
+> run
+ x0: 000000000008EF7C   x1: 0000000000000301   x2: 0000000000000070
+ x3: 000000000000000B   x4: 0000000000024000   x5: 0000000000000000
+ x6: 0000000000000000   x7: 0000000000000000   x8: 0000000000000000
+ x9: 0000000000000000  x10: 0000000000000000  x11: 0000000000000000
+x12: 0000000000000000  x13: 0000000000000000  x14: 0000000000000000
+x15: 0000000000000000  x16: 0000000000000000  x17: 0000000000000000
+x18: 0000000000000000  x19: 0000000000000000  x20: 0000000000000000
+x21: 0000000000000000  x22: 0000000000000000  x23: 0000000000000000
+x24: 0000000000000000  x25: 0000000000000000  x26: 0000000000000000
+x27: 0000000000000000  x28: 0000000000000000  x29: 000000000007FFF0
+x30: 000000000008EF7C  elr_el1: 8EF7C  spsr_el1: 600003C4
+  esr_el1: F2000000  far_el1: 0
+sctlr_el1: 30D00800  tcr_el1: 0
+>
+```
+
+## 六、32位ARM裸机程序
+
+…… 进行中 ……
