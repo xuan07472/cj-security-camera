@@ -12,12 +12,15 @@
 
 * 简介：使用ARM Cortex-A7 32位内核、带有GPU（2D 3D显示加速、图片和音频视频编解码）的博通BCM2837芯片（树莓派2B同款硬件，但不使用树莓派的系统和软件），在QEMU模拟器中运行，实现安防摄像机、音视频播放器等嵌入式设备的功能。
 
-|**依赖的硬件资源**|详情|备注|
+<center>表1 本仓库软硬件资源描述</center>
+|**软硬件资源**|详情|备注|
 |---|---|---|
 |QEMU BCM2837芯片模拟器|900MHz 4核 ARM Cortex-A7 CPU，VideoCore IV 双核 GPU（2D 3D显示加速、视频编解码），1GB 内存，100M以太网，HDMI显示，USB2.0 x 4，SD卡，音频输出，GPIO，摄像头输入，液晶屏接口，串口，SPI，I2C等嵌入式通用模块|树莓派2B同款硬件|
-|**编写的软件模块**|……正在进行中……||
+|**硬件模块测试用例：raspi3-tutorial**|包含让CPU运行的空程序、|在仓库根目录raspi3-tutorial文件夹中，开箱即用，直接make，直接在QEMU中运行|
+|**裸机工程**|……未开始……||
+|**RTOS工程**|……未开始……||
+|**Linux工程**|……未开始……||
 |**使用的开源库**|||
-
 
 ---
 
@@ -65,6 +68,8 @@
 
 ## 四、必须的准备工作
 
+* 本章前面的总述和前面3小节只是对要做的工作进行一个文字描述，本章第4小节有完整的安装过程，可以直接跳到”4）完整的环境安装步骤“进行阅读。
+
 1. 首先，需要Linux或者Windows MinGW等环境，如果你是第一次使用Linux，则不应该摸索Windows下的MinGW环境，这应该是对Linux已经很熟悉之后才做的事，因为在里面装软件很麻烦；你应该直接使用Ubuntu或其它Linux发行板，推荐在Windows下使用VMware虚拟机安装Ubuntu；具体的过程略。
 
 2. Ubuntu下安装QEMU，这也等同于准备好了一块硬件开发板，过程略。
@@ -75,13 +80,13 @@
 
 * 如果你以前用过树莓派，那么请忘掉它，我们按照嵌入式的模式来。
 
-* 写树莓派的底层程序，并不能像8051或普通MCU芯片一样，使用汇编，从零地址开始的复位中断开始，能够控制芯片上电后执行的第一条指令；树莓派上电后是芯片里面的GPU先开始运行，并且这部分代码是不公开的，GPU底层的寄存器介绍也是不公开的，只能加载官方提供的GPU的驱动；GPU上电后再引导ARM CPU运行。
+* 写树莓派的底层程序，并不能像8051或普通MCU芯片一样，使用汇编，从零地址开始的复位中断开始写，能够控制芯片上电后执行的第一条指令；因为树莓派上电后是芯片里面的GPU先开始运行，并且这部分代码是不公开的，GPU底层的寄存器介绍也是不公开的，只能加载官方提供的GPU的驱动；GPU上电后再引导ARM CPU运行。
 * 但其实如果不是在芯片原厂，一般嵌入式开发人员也不需要知道芯片开发包里面的boot是如何实现的，编译器里面的C标准库是如何实现的，中断向量表和堆栈是如何分配的，各个驱动模板是如何实现的，操作系统是怎么移植的；能用就行。
 
 ### 1）安装Linux环境
 
-* 可以在Windows下安装Msys2+MinGW32+MinGW64，或者安装Cygwin，这都是Linux运行环境；如果安装了Git，里面也会自带精简版的MinGW64；如果你有已经安装过MinGW环境的朋友，特别是他已经安装好了树莓派交叉编译工具和其它工具，你可以将他安装过的文件夹拷过来，在你的电脑上也同样可以点开即用，换句话说就是安装过一次以后的MinGW是绿色软件，只是文件比较大，会有几十G。
-* 也可以先安装VMware Player虚拟机，然后在虚拟机中安装Ubuntu系统，这是一个Linux发行版；直接使用Linux系统，安装软件的教程和各种资料会比MingW更方便；如果你有已经在虚拟机中安装过Linux的朋友，特别是他在已经安装好了树莓派交叉编译工具、QEMU和其它工具，你可以将他安装过的文件夹拷过来。
+* 可以在Windows下安装MSYS2，或者安装Cygwin，这都是Linux运行环境；如果安装了Git，里面也会自带精简版的MSYS2+MinGW64；如果你有已经安装过MSYS2环境的朋友，特别是他已经安装好了树莓派交叉编译工具和其它工具，你可以将他安装过的文件夹拷过来，在你的电脑上也同样可以点开即用，换句话说就是安装过一次以后的MSYS2是绿色软件，只是文件比较大，会有几十G。
+* 也可以先安装VMware Player虚拟机，然后在虚拟机中安装Ubuntu系统，这是一个Linux发行版；直接使用Linux系统，安装软件的教程和各种资料会比MingW更方便；如果你有已经在虚拟机中安装过Linux的朋友，特别是他在已经安装好了树莓派交叉编译工具、QEMU和其它工具，你可以将他安装过的系统文件夹拷贝过来。
 * 还可以使用双系统，或者干脆准备一台装了Linux的电脑。
 
 ### 2）用QEMU模拟器运行树莓派
@@ -108,19 +113,19 @@
 
 ### 4）完整的环境安装步骤
 
-* 写在前面，我会提供已经安装好各种工具的MSYS2环境，如果你没用过Linux，建议你直接下载使用，或者改用VMware Player虚拟机+Ubuntu，因为MSYS2中安装软件的教程很难快速找到，需要有一些使用Linux的经验才知道怎么安装特定软件；我的MSYS2环境添加了32位和64位的交叉编译工具，他们的来源不一样，后面会详述。
+* 写在前面，我会提供已经安装好各种工具的MSYS2环境，如果你没用过Linux，建议你直接下载本系统压缩包cj_msys64.zip，解压后使用，或者自行使用VMware Player虚拟机+Ubuntu安装开发环境，因为MSYS2中安装软件的教程很难快速找到，需要有一些使用Linux的经验才知道怎么安装特定软件；我的MSYS2环境添加了32位和64位的交叉编译工具，他们的来源不一样，后面会详述。
 
 * 下面是从头到尾的工具软件安装步骤：
-  * 推荐使用MSYS2+MinGW32+MinGW64，基本上开发过程中你能在Linux下实现的，也都能在这个环境下实现，只是有些教程没有Ubuntu下那么好找。
-  * MSYS2的安装教程详见本仓库**子文档**：[《04_MSYS2安装步骤.md》](./doc/04_MSYS2安装步骤.md)
+  * 推荐使用MSYS2 + 已经用MinGW32或MinGW64编译好的程序，基本上开发过程中你能在Linux下实现的，也都能在这个环境下实现，只是有些教程没有Ubuntu下那么好找；在MSYS2中不能使用Linux的程序，必须用MinGW将源码重新编译过后才能使用，这一般是软件供应商已经做好的。
+  * MSYS2的更多信息详见本仓库**子文档**：[《04_MSYS2简述.md》](./doc/04_MSYS2简述.md)
 
-<center>表1 MSYS2、MinGW和Cygwin的关系</center>
+<center>表2 MSYS2、MinGW和Cygwin的关系</center>
 
 |软件名|版本|作用|特点|
 |---|---|---|---|
 |MSYS|MSYS，MSYS2|Linux命令行终端：Shell，Bash|没有在Windows下编译Linux程序的工具集，会自带已经被MinGW编译好的一些包；脱胎于Cygwin，但容量更小；MSYS2是因为MSYS常年不更新而新组的的一个项目；MSYS2安装完后的文件名为msys64，你可以将你安装好之后的msys64文件夹打包发给别人，这样别人无安装就可以用了，只是容量有点大，几十G|
 |MinGW|MinGW32，MinGW64|一组编译工具链|编译后生成的是纯粹的Windows程序；它自带的命令行终端很难用也不全，要和MSYS2终端配合使用；MinGW64是因为MinGW32常年不更新而新组的的一个项目|
-|Cygwin|Cygwin|编译工具+命令行|有模拟层，将Linux API转成Windows API再执行程序，效率低，容量大，速度慢，2010年左右在Windows下搭建交叉编译环境时多用它|
+|Cygwin|Cygwin|编译工具+命令行|有模拟层，将Linux API转成Windows API再执行程序，效率低，容量大，速度慢，2010年左右在Windows下搭建交叉编译环境时还多用它；要运行纯粹的Linux程序时也用它|
 
 * *参考网址：*
   * [CygWin、MingW、MSYS之间的关系](https://www.jianshu.com/p/09198f6e0a3c)
@@ -133,12 +138,12 @@
 
 1. 我当前下载的版本是msys2-x86_64-20221028.exe
   * 网上的安装教程是[使用msys2打造优雅的开发环境](https://www.cnblogs.com/52fhy/p/15158765.html)
-  * 在官网主页找到下载链接：[github.com/msys2/msys2-installer/releases/download/2022-10-28/msys2-x86_64-20221028.exe](https://github.com/msys2/msys2-installer/releases/download/2022-10-28/msys2-x86_64-20221028.exe) ，85M左右，这只是一个安装器，不是全部的软件；这是GitHub的地址，有时候下载慢，有时候无法访问；这个可下载的软件是CICD自动生成的，国内的Gitee镜像也没有这个下载包；但你也可以在网上其它的地方比如网盘之类的找到这个文件的下载。
+  * 在官网主页找到下载链接：[github.com/msys2/msys2-installer/releases/download/2022-10-28/msys2-x86_64-20221028.exe](https://github.com/msys2/msys2-installer/releases/download/2022-10-28/msys2-x86_64-20221028.exe) ，85M左右，这只是一个安装器，不是全部的软件；这是GitHub的地址，有时候下载慢，有时候无法访问；这个可下载的软件是CICD自动生成的，国内的Gitee镜像中也没有这个下载包；但你也可以在网上其它的地方比如网盘之类的找到这个文件的下载。
 2. 我将软件安装在D盘根目录，软件会安装在d:\msys64中，安装目录不能有空格、中文。
 3. 安装完之后先不打开软件，先将国外镜像地址换成国内镜像地址，参考上方教程。
 4. 电脑配置环境变量，在PATH中增加一行D:\msys64\usr\bin
   * [win10环境变量怎么设置 win10设置环境变量的方法](https://www.win7zhijia.cn/win10jc/win10_47252.html)
-5. 双击运行主目录下的mingw64.exe或者msys2.exe都可以，其它的exe有些是32位的，有些是编译器不是用的gcc。
+5. 双击运行主目录下的msys2.exe或者mingw64.exe都可以，其它的exe有些是32位的，有些是非gcc编译器对应的软件。
 
 #### 4.2 MSYS2中安装QEMU
 
@@ -158,13 +163,12 @@ Copyright (c) 2003-2022 Fabrice Bellard and the QEMU Project developers
 
 #### 4.3 MSYS2中安装32位和64位ARM交叉编译工具
 
-* 树莓派提供了在Linux下使用的交叉工具包的文件夹名为gcc-linaro-arm-linux-gnueabihf-raspbian-x64，使用的编译器名为arm-linux-gnueabihf-gcc，下载地址[raspberrypi-tools/ arm-bcm2708](https://gitee.com/qianchenzhumeng/raspberrypi-tools/tree/master/arm-bcm2708)。
-
-* GNU官方提供了树莓派在Windows中使用的交叉工具包，默认的工具是使用Visual Studio +  VisualGDB来进行编译的。
-  32位地址：[Prebuilt Windows Toolchain for Raspberry Pi](https://gnutoolchains.com/raspberry/)
-  64位地址：[Prebuilt Windows Toolchain for Raspberry Pi (64-bit)](https://gnutoolchains.com/raspberry64/)
-
-* ARM在Windows下自带的交叉编译工具为gcc-arm-none-eabi-10.3-2021.10-win32.exe，网页路径在https://developer.arm.com/downloads/-/gnu-rm ，交叉编译工具名为arm-none-eabi-gcc，我们不使用树莓派自带的交叉编译工具，而直接使用ARM的；因为树莓派没有在MinGW下编译它的交叉编译工具，而我也不想在Cygwin环境使用树莓派的Linux交叉编译工具。
+* 一些工具介绍：
+  * 树莓派提供了在Linux下使用的交叉工具包的文件夹名为gcc-linaro-arm-linux-gnueabihf-raspbian-x64，使用的编译器名为arm-linux-gnueabihf-gcc，下载地址[raspberrypi-tools/ arm-bcm2708](https://gitee.com/qianchenzhumeng/raspberrypi-tools/tree/master/arm-bcm2708)。
+  * GNU官方提供了树莓派在Windows中使用的交叉工具包，默认的工具是使用Visual Studio +  VisualGDB来进行编译的。  
+  32位地址：[Prebuilt Windows Toolchain for Raspberry Pi](https://gnutoolchains.com/raspberry/)  
+  64位地址：[Prebuilt Windows Toolchain for Raspberry Pi (64-bit)](https://gnutoolchains.com/raspberry64/)  
+  * ARM在Windows下自带的交叉编译工具为gcc-arm-none-eabi-10.3-2021.10-win32.exe，网页路径在https://developer.arm.com/downloads/-/gnu-rm ，交叉编译工具名为arm-none-eabi-gcc，我们不使用树莓派自带的交叉编译工具，而直接使用ARM的；因为树莓派没有直接给出MinGW下的交叉编译工具，而我也不想在Cygwin环境使用树莓派的Linux交叉编译工具。
 
 * 但也不在ARM官方下载，我们在MSYS2中同样也能找到：在https://packages.msys2.org/base 中能搜到mingw-w64-arm-none-eabi-gcc和mingw-w64-arm-none-eabi-gdb
   * MSYS2下载命令 pacman -S mingw-w64-x86_64-arm-none-eabi-gcc，大小有1.24 GB，参考网址：[Package: mingw-w64-x86_64-arm-none-eabi-gcc](https://packages.msys2.org/package/mingw-w64-x86_64-arm-none-eabi-gcc?repo=mingw64)
@@ -178,7 +182,11 @@ Copyright (c) 2003-2022 Fabrice Bellard and the QEMU Project developers
   * 我msys64中的路径是msys64/mingw32/bin/gcc-linaro-7.5.0-2019.12-i686-mingw32_aarch64-linux-gnu/bin/aarch64-linux-gnu-gcc.exe
   * 在Linaro这里也能下到32位的GCC交叉编译工具：[gcc-linaro-7.5.0-2019.12-i686-mingw32_arm-linux-gnueabihf.tar.xz](https://releases.linaro.org/components/toolchain/binaries/latest-7/arm-linux-gnueabihf/)
   * https://www.linaro.org/ Linaro公司主要是做ARM的一些开源工具，树莓派也是直接使用的Linaro编译器。
-  
+
+* MSYS2安装make
+  * pacman -S make
+  * [Package: make](https://packages.msys2.org/package/make?repo=msys&variant=x86_64)
+
 * *参考网址：*
   * [Windows下编译树莓派pico C\C++（Building on MS Windows）](https://blog.csdn.net/m0_45961169/article/details/127282390)
   * [树莓派 交叉编译环境搭建（Win 7）](https://www.cnblogs.com/easy-busy/p/4402218.html)
@@ -188,43 +196,59 @@ Copyright (c) 2003-2022 Fabrice Bellard and the QEMU Project developers
 
 #### 4.4 用现成的程序从QEMU运行树莓派
 
-* 在以下网址https://gitee.com/mirrors_bztsrc/raspi3-tutorial/tree/master/01_bareminimum 下载编译好的树莓派程序，我已下载好，存放在msys64家目录下的01_run文件夹中
-* 使用命令运行：/mingw64/bin/qemu-system-aarch64 -M raspi3b -kernel ~/raspi/01_run/kernel8.img -d in_asm
+* 从以下网址https://gitee.com/mirrors_bztsrc/raspi3-tutorial/tree/master/0A_pcscreenfont 下载编译好的树莓派程序，我已下载好，存放在msys64家目录下的1_raspi/01_run文件夹中
+* 使用命令运行：/mingw64/bin/qemu-system-aarch64 -M raspi3b -kernel ~/1_raspi/01_run/kernel8.img -d in_asm
 * 能看到出现了QEMU窗口，并显示了hello world。
 效果如下：![img](./picture/01_QEMU_RUN.png)
 
 #### 4.5 交叉编译工具编译程序，并在树莓派QEMU模拟中运行
 
+1. 在[mirrors_bztsrc/raspi3-tutorial](https://gitee.com/mirrors_bztsrc/raspi3-tutorial)下载一个国外的英文仓库，是演示64位ARM树莓派裸机编程的，我借鉴这里面的工程。
+  * 这个工程已下载到当前仓库根目录下，我也会将这个目录拷贝到msys64的家目录下，我会将里面的Makefile和自动运行改成和msys64适配，保证一个make命令就能编译程序，一个make run就能在QEMU中运行刚刚编译的程序。
+  * 输出qemu所在位置和aarch64编译器所在位置的环境变量，这样就不用每次都写完整的路径了。
+  * 打开家目录也就是msys64/home/jim/下的.bashrc，在里面末尾加上  
+    export PATH=$PATH:/mingw64/bin  
+    export PATH=$PATH:/mingw32/bin/gcc-linaro-7.5.0-2019.12-i686-mingw32_aarch64-linux-gnu/bin  
+  * 生效配置 source .bashrc
+  * 查看环境变量 echo $PATH，确认已经生效
 
----
+2. 进入msys64 raspi3-tutorial源码目录，编译并运行
+  * 源码我已经拷贝到msys64中，并且已经改了Makefile，能直接编译和运行，同时修改过以后的源码我也会在本仓重上传
+  * 源码路径 ~/raspi3-tutorial/01_bareminimum，也就是/home/jim/raspi3-tutorial/01_bareminimum，也就是D:\msys64\home\jim\raspi3-tutorial\01_bareminimum，后面所有的示例路径我都采用第一种写法。
+  * 进入目录 cd ~/raspi3-tutorial/01_bareminimum
+  * 编译 make
+  * 运行 make run
+  * make run能运行，是因为在Makefile里面写了命令 qemu-system-aarch64 -M raspi3b -kernel kernel8.img -d in_asm
+  * 01_bareminimum用例是一个空程序，所以QEMU里面什么都不会显示，其它用例的效果我会再后面展示。
 
-* 树莓派QEMU运行
+* *参考网址：*
+* 树莓派有关裸机编程的教程很少，我只找到了几个英文教程和几篇中文博客：
+  * 裸机编程：[mirrors_bztsrc / raspi3-tutorial](https://gitee.com/mirrors_bztsrc/raspi3-tutorial)
+  * 编写操作系统：[lxjj / rpi4-osdev](https://gitee.com/lxjj/rpi4-osdev)
+  * 一点中文翻译，[在树莓派4B上编写裸机操作系统(PART0)](https://www.bilibili.com/read/cv11175486)
+  * 另一个树莓派操作系统开发：[Baking Pi – Operating Systems Development](https://www.cl.cam.ac.uk/projects/raspberrypi/tutorials/os/)
+  * [RPi bring up hello world! 树莓派底层编程裸机点亮led](https://zhuanlan.zhihu.com/p/519166136)
+  * [996refuse/emperorOS Public](https://github.com/996refuse/emperorOS/tree/756bb64a9019cd5c3ca2fa887c3a1d76b910c86f)
+  * [4 anbox 树莓派 树莓派4裸机基础教程:从hello world开始](https://blog.csdn.net/weixin_36372094/article/details/112191177)
+  * [Raspberry PI 系列 —— 裸机点亮LED灯](http://t.zoukankan.com/zhchoutai-p-6970667.html)
 
-## 五、开发步骤
+* *参考网址：*
+* [树莓派的交叉编译 （BCM2835/6/7/BCM23711）](https://www.valvers.com/open-software/raspberry-pi/bare-metal-programming-in-c-part-1/)
 
-### 1）01_Helloworld
+#### 4.6 有关树莓派裸机编程的介绍
 
-* 第一个裸机程序。
-* 直接参考https://github.com/dwelch67/raspberrypi教程。
-* 参考[Tutorial 05 - UART0, PL011](https://gitee.com/mirrors_bztsrc/raspi3-tutorial/tree/master/05_uart0)
-
----
-
-* 树莓派的底层固件（Bootloader）是闭源的，但可以在此基础上引导自己的U-Boot、Linux kernel。
+* 树莓派里面有GPU和ARM CPU，GPU先上电运行，然后再引导ARM运行
+* 树莓派的GPU底层固件（Bootloader）是闭源的，但可以在此基础上引导自己的U-Boot、Linux kernel，也可以不用U-Boot和Linux，直接引导裸机程序或者RTOS；这种引导方式和Xilinx ZYNQ类似，ARM和FPGA一个先启动一个后启动。
 
 * 一些其它的树莓派嵌入式相关的开源仓库：
-
 (1) 运行在 Raspberry Pi 上的小型嵌入式系统
-
 - Xinu project ([xinu-os/xinu](https://link.zhihu.com/?target=https%3A//github.com/xinu-os/xinu))
 - Ultibo project ([ultibohub/Core](https://link.zhihu.com/?target=https%3A//github.com/ultibohub/Core))
 
 (2) 一些在 Raspberry Pi 上可以嵌入在其他系统中的运行库
-
 - USPi([rsta2/uspi](https://link.zhihu.com/?target=https%3A//github.com/rsta2/uspi)), 一个小型的支持 USB 通讯的库
 
 (3) 以及其他一些基于 Raspberry Pi 裸机开发例子：
-
 - Bare Metal Programming on Raspberry Pi 3：([bztsrc/raspi3-tutorial](https://link.zhihu.com/?target=https%3A//github.com/bztsrc/raspi3-tutorial))
 - Raspberry Pi ARM based bare metal examples ([dwelch67/raspberrypi](https://link.zhihu.com/?target=https%3A//github.com/dwelch67/raspberrypi))
 
@@ -239,4 +263,45 @@ Copyright (c) 2003-2022 Fabrice Bellard and the QEMU Project developers
   * [树莓派裸板linux,树莓派裸机开发步骤](https://blog.csdn.net/weixin_35578211/article/details/116987578)
   * [树莓派裸核程序开发 —— 从汇编到第一个C语言程序](https://blog.csdn.net/u014082689/article/details/89074600)
   * [树莓派裸机代码bootloader学习总结](https://blog.csdn.net/weixin_34001430/article/details/92686304)
-  * 
+
+---
+
+## 五、raspi3-tutorial硬件测试用例
+
+* 原始网址：[mirrors_bztsrc / raspi3-tutorial](https://gitee.com/mirrors_bztsrc/raspi3-tutorial)
+* 本仓库中的地址：根目录/raspi3-tutorial/
+* msys64中的地址：家目录 ~/raspi3-tutorial/
+* 硬件是raspi3，64位ARM芯片，但因为有现成的代码，可以先熟悉编译环境，之后再在32位ARM上跑。
+
+<center>表3 raspi3-tutorial各测试用例的描述</center>
+
+|用例名称|作用|备注|
+|---|---|---|
+|00_crosscompiler|空程序，只是为了验证编译器和模拟器安装正确，能够编译和运行||
+|01_bareminimum|||
+|02_multicorec|||
+|03_uart1|||
+|04_mailboxes|||
+|05_uart0|||
+|06_random|||
+|07_delays|||
+|08_power|||
+|09_framebuffer|||
+|0A_pcscreenfont|||
+|0B_readsector|||
+|0C_directory|||
+|0D_readfile|||
+|0E_initrd|||
+|0F_executionlevel|||
+|10_virtualmemory|||
+|11_exceptions|||
+|12_printf|||
+|13_debugger|||
+|14_raspbootin64|||
+|15_writesector|||
+
+### 1）01_bareminimum
+
+* 第一个裸机程序。
+* 空程序，只是为了验证编译器和模拟器安装正确，能够编译和运行
+
