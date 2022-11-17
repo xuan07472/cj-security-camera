@@ -527,7 +527,33 @@ sctlr_el1: 30D00800  tcr_el1: 0
 
 ### 2）BCM2836芯片资源
 
+* BCM2836是基于BCM2835的，只是在BCM2835的基础上将CPU从ARM11换成了ARM Cortex-A7，以为外设资源还需要看BCM2835的芯片手册。
 
+<center>表5 博通BCM2836芯片的所有模块</center>
+
+|模块名称|描述|备注|
+|---|---|---|
+|GPU|VideoCore IV，支持OpenGL ES 2.0，1080p 30帧 H.264和MPEG-4解码||
+|HDMI|HDMI音频视频输出||
+|USB|4个USB 2.0，Core和Phy用的是Synopsys IP，该模块被GPU所拥有||
+|SD EMMC|支持MultiMedia和SD卡||
+|以太网|100M||
+|定时器|1个64位定时器，2个32位定时器||
+|Mailbox|GPU和CPU核间通信|
+|中断控制|GPU中断和ARM中断||
+|UART|两个串口||
+|SPI|SPI1、SPI2||
+|BSC（I2C）|Broadcom Serial Controller (BSC)，BSC0~2三个，I2C||
+|DMA|数据快速搬运，16个通道||
+|GPIO|54个IO口||
+|I2S PCM|音频输入输出||
+|PWM|Pulse Width Modulator||
+|SPI|SPI总线||
+
+* ARM Cortex-A7支持ARM、Thumb和Thumb-2指令集。
+  * [Arm技术文档分享|Cortex-A 系列处理器Cortex-A7文档（附PDF）](https://aijishu.com/a/1060000000103112)
+
+## 七、BCM2836裸机编程
 
 
 
