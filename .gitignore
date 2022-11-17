@@ -1,4 +1,6 @@
 *.pdf
 *.elf
 *.o
+*.crdownload
+*.tar.gz
 

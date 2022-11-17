@@ -10,13 +10,13 @@
 
 ---
 
-* 简介：使用ARM Cortex-A7 32位内核、带有GPU（2D 3D显示加速、图片和音频视频编解码）的博通BCM2837芯片（树莓派2B同款硬件，但不使用树莓派的系统和软件），在QEMU模拟器中运行，实现安防摄像机、音视频播放器等嵌入式设备的功能。
+* 简介：使用ARM Cortex-A7 32位内核、带有GPU（2D 3D显示加速、图片和音频视频编解码）的博通BCM2836芯片（树莓派2B同款硬件，但不使用树莓派的系统和软件），在QEMU模拟器中运行，实现安防摄像机、音视频播放器等嵌入式设备的功能。
 
 <center>表1 本仓库软硬件资源描述</center>
 
 |**软硬件资源**|详情|备注|
 |---|---|---|
-|QEMU BCM2837芯片模拟器|900MHz 4核 ARM Cortex-A7 CPU, VideoCore IV 双核 GPU (2D 3D显示加速, 视频编解码), 1GB 内存, 100M以太网, HDMI显示, USB2.0 x 4, SD卡, 音频输出, GPIO, 摄像头输入, 液晶屏接口, 串口, SPI, I2C等嵌入式通用模块|树莓派2B同款硬件|
+|QEMU BCM2836芯片模拟器|900MHz 4核 ARM Cortex-A7 CPU, VideoCore IV 双核 GPU (2D 3D显示加速, 视频编解码), 1GB 内存, 100M以太网, HDMI显示, USB2.0 x 4, SD卡, 音频输出, GPIO, 摄像头输入, 液晶屏接口, 串口, SPI, I2C等嵌入式通用模块|树莓派2B同款硬件|
 |**硬件模块测试用例：raspi3-tutorial**|裸机程序，包含让CPU运行的空程序、串口打印、屏幕图像输出、屏幕文字输出、读写SD卡、bootloader|在仓库根目录raspi3-tutorial文件夹中, 开箱即用, 直接make, 直接在QEMU中运行|
 |**裸机工程**|......未开始......||
 |**RTOS工程**|......未开始......||
@@ -483,6 +483,53 @@ sctlr_el1: 30D00800  tcr_el1: 0
 >
 ```
 
-## 六、32位ARM裸机程序
+## 六、BCM2836芯片描述
 
-…… 进行中 ……
+### 1）BCM2836芯片资料
+
+* 树莓派按时间的板子信息如下，因为嵌入式一般是用32位的CPU，所以我使用低版本树莓派，我会将要使用的型号加粗标注：
+
+<center>表4 树莓派的所有板子</center>
+
+|发布时间|名称|芯片|外设|
+|---|---|---|---|
+|2011-12|Raspberry Pi Model B|BCM2835 ARM1176JZF-S 700MHz 512M|有网口、无WiFi和蓝牙|
+|2014-7-14|Raspberry Pi Model B+|同上，BCM2835 ARM1176JZF-S 700MHz 512M|同上|
+|2014-11-11|Raspberry Pi Model A+|同上，BCM2835 ARM1176JZF-S 700MHz 512M|无网口、WiFi和蓝牙|
+|2015-02-02|**Raspberry Pi 2 Model B**|**BCM2836** ARM **Cortex-A7** 900MHz 4核 1G|**有网口**、无WiFi和蓝牙|
+|2015-11-26|Raspberry Pi Zero|BCM2835 ARM11 1GHz DDR512M|无网口、WiFi和蓝牙|
+|2016-02-29|Raspberry Pi 3 Model B|BCM2837 ARM Cortex-A53 1.2GHz 64位4核 1GB|有网络、WiFi和蓝牙|
+|2017-3-1|**Raspberry Pi Zero W**|**BCM2835 ARM11** 1GHz 512M|无网口，**有WiFi和蓝牙**|
+|2018-3-4|Raspberry Pi 3 Model B+|BCM2837 ARM Cortex-A53 1.2GHz 64位4核 1GB|有网络、WiFi和蓝牙|
+|2018-11-15|Raspberry Pi 3 Model A+|BCM2837B0 ARM Cortex-A53 1.4GHz 64位4核 1GB|无网络、有WiFi和蓝牙|
+|2019-06-24|Raspberry Pi 4 Model B|BCM2711 ARM Cortex-A72 1.5GHz 64位4核 8GB|有网络、WiFi、蓝牙|
+
+* *参考资料：*
+  * [树莓派介绍以及FAQ](https://shumeipai.nxez.com/intro-faq)
+
+* 我使用32位ARM Cortex-A7 4核的BCM2836芯片，该芯片的参数如下；2836的文档是以2835为基础的，所以也要看2835的文档：
+  * BCM2836官网资料[BCM2836](https://www.raspberrypi.com/documentation/computers/processors.html#bcm2836)
+  * BCM2835官网资料[BCM2835](https://www.raspberrypi.com/documentation/computers/processors.html#bcm2835)
+  * BCM2835外设文档：[BCM2835 ARM Peripherals](https://datasheets.raspberrypi.com/bcm2835/bcm2835-peripherals.pdf)
+  * BCM2835勘误表：[BCM2835 datasheet errata](https://elinux.org/BCM2835_datasheet_errata)
+  * GPU手册：[VideoCore® IV 3D  Architecture Reference Guide](https://docs.broadcom.com/doc/12358545)
+  * [博通GPU驱动](https://docs.broadcom.com/docs/12358546)
+  * BCM2836外设：[bcm2836-peripherals.pdf](https://datasheets.raspberrypi.com/bcm2836/bcm2836-peripherals.pdf)
+  * BCM2836 ARM Cortex-A7 MPCore技术参考手册：[Cortex-A7 MPCore Technical Reference Manual](https://documentation-service.arm.com/static/602cf701083323480d479d18?token=)
+  * BCM2835 ARM11内核：[ARM1176JZF-S Technical Reference Manual r0p7](https://documentation-service.arm.com/static/5e8e294efd977155116a6ca3?token=)
+
+* 芯片的Boot
+  * 芯片的Boot在E2PROM中，是给GPU用的，GPU先启动，然后在引导ARM；Boot固件可以用工具更新，但它是闭源的
+  * 详见[Updating the EEPROM Configuration](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#raspberry-pi-4-boot-eeprom)
+
+* *参考资料：*
+  * [Raspberry Pi官网](https://www.raspberrypi.com/)
+
+### 2）BCM2836芯片资源
+
+
+
+
+
+
+
