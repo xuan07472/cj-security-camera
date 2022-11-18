@@ -555,7 +555,40 @@ sctlr_el1: 30D00800  tcr_el1: 0
 
 ## 七、BCM2836裸机编程
 
+### 1）可以参考的教程
 
+* Boot流程介绍：
+  * 一般ARM芯片从0地址启动，而0地址默认是复位中断的入口，写了复位中断处理程序后，进一步向下执行就是配置堆和栈的地址与大小，配置系统频率、DDR内存，跳转到C语言Main()函数执行。
+  * 而BCM2836是GPU先运行，并且GPU的Boot程序是闭源的，所以是GPU从0地址开始跑；
+  * GPU先运行bootcode.bin这个程序，再引导start.elf程序运行，然后再引导kernel8.img这个ARM程序运行，ARM程序运行的起始地址是固定的0x80000，所以写ARM裸机程序的时候第一个代码段要指定到这个地址。
+  * 写ARM裸机程序时，一些必要的芯片初始化也可以省略，因为GPU已经帮忙做了，外设寄存器地址从0x3F000000虚拟地址开始
+  * 有关BCM2836 Boot的介绍详见本地文档[./raspi3-tutorial/README.md](./raspi3-tutorial/README.md) 的“About the hardware”小节。
+  * BCM2836 ARM启动前的Boot程序下载地址：[Welcome to the Raspberry Pi Firmware Wiki](https://github.com/raspberrypi/firmware/wiki)
+  * Boot固件下载地址2：[raspberrypi/firmware](https://github.com/raspberrypi/firmware/tree/master/boot)
+  * 这里有树莓派官方的ARM Boot汇编代码：[tools/armstubs/armstub8.S](https://github.com/raspberrypi/tools/blob/master/armstubs/armstub8.S)
 
+* 几个对裸机编程有帮助的教程：
+  * [Baking Pi – Operating Systems Development](https://www.cl.cam.ac.uk/projects/raspberrypi/tutorials/os/)
+  * 上面的教程：目的是讲述怎么用汇编编程，只支持Raspberry Pi Model B，BCM2835 ARM1176JZF-S，完全用汇编编写；控制LED灯和GPIO，控制GPU在屏幕上显示内容，绘制图形，用汇编实现printf，键盘输入。
+  * [dwelch67/raspberrypi](https://github.com/dwelch67/raspberrypi)
+  * 上面的教程：支持树莓派1和2，写ARM裸机程序，里面是一个个分开的用例，有串口、SPI、显示、解压缩、显示图片、ARM Bootloader等，值得一看。
+  * [PeterLemon/RaspberryPi](https://gitee.com/mirrors_PeterLemon/RaspberryPi) ，https://github.com/PeterLemon/RaspberryPi
+  * 上面的教程：主要是汇编，写了文件解码、音频播放、屏幕显示、绘图、播放视频等。
+  * [rsta2/circle](https://github.com/rsta2/circle)
+  * 上面的教程：主要是C++写到树莓派裸机程序，很全，各个硬件模块的驱动都有
+  * [DexOS the game console OS](http://dex-os.github.io/) 一个用汇编写的操作系统
+  * [DexBasic For the Raspberry pi](http://dex-os.github.io/DexBasic/DexBasic.htm) 一个树莓派汇编编译器
+  * [A Raspberry Pi 3 (formerly Raspberry Pi 2 v1.1) based games console, including RTOS, GPU driver, SDK](https://jaystation2.maisonikkoku.com/) 树莓派GPU程序
 
+* *参考网址：*
+* https://github.com/raspberrypi 里有树莓派的一些仓库集合，有用的一些仓库有：
+  * https://github.com/raspberrypi/tools
+  * Source code for ARM side libraries for interfacing to Raspberry Pi GPU：https://github.com/raspberrypi/userland
+  * https://github.com/raspberrypi/libcamera
+  * https://github.com/raspberrypi/firmware
+  * The official documentation for Raspberry Pi computers and microcontrollers：https://github.com/raspberrypi/documentation
+  * https://github.com/raspberrypi/linux
+  * Github链接如果打不开，则可以将链接放到Gitee里搜索，一般都有人上传镜像
+
+### 2）本地裸机工程介绍
 
