@@ -10,7 +10,7 @@
 
 ---
 
-* 简介：使用ARM Cortex-A7 32位内核、带有GPU（2D 3D显示加速、图片和音频视频编解码）的博通BCM2836芯片（树莓派2B同款硬件，但不使用树莓派的系统和软件），在QEMU模拟器中运行，实现安防摄像机、音视频播放器等嵌入式设备的功能。
+* 简介：使用ARM Cortex-A7 32位内核、带有GPU（2D 3D显示加速、图片和音频视频编解码）的博通BCM2836芯片（树莓派2B同款硬件，但不使用树莓派的系统和软件），初期在QEMU模拟器中运行，需要调用GPU时再在实际硬件上运行，实现安防摄像机、音视频播放器等嵌入式设备的功能。
 
 <center>表1 本仓库软硬件资源描述</center>
 
@@ -18,9 +18,9 @@
 |---|---|---|
 |QEMU BCM2836芯片模拟器|900MHz 4核 ARM Cortex-A7 CPU, VideoCore IV 双核 GPU (2D 3D显示加速, 视频编解码), 1GB 内存, 100M以太网, HDMI显示, USB2.0 x 4, SD卡, 音频输出, GPIO, 摄像头输入, 液晶屏接口, 串口, SPI, I2C等嵌入式通用模块|树莓派2B同款硬件|
 |**硬件模块测试用例：raspi3-tutorial**|裸机程序，包含让CPU运行的空程序、串口打印、屏幕图像输出、屏幕文字输出、读写SD卡、bootloader|在仓库根目录raspi3-tutorial文件夹中, 开箱即用, 直接make, 直接在QEMU中运行|
-|**裸机工程**|......未开始......||
-|**RTOS工程**|......未开始......||
-|**Linux工程**|......未开始......||
+|**裸机项目**|......进行中......||
+|**RTOS项目**|......未开始......||
+|**Linux项目**|......未开始......||
 |**使用的开源库**|||
 
 ---
@@ -33,9 +33,9 @@
 
 3. 我不使用具体的开发板，而是使用QEMU模拟器；原因一就是上面“第2条前言”所描述的通用和开箱即用，因为不同的开发板太多了，开发板也很贵，真的没必要让看这个工程的人还去花钱买块板子，板子买回来很大的概率也是吃灰。原因二是我自己也从来没买过开发板，也不喜欢在开发板上频繁下载调试程序，很慢也很烦，一般纯逻辑的模块我会先用gcc或者模拟器验证好，然后再上板子调试。原因三是芯片原厂开发芯片开发包时，芯片还没设计好的初期也会先使用模拟器，不过他们完整的模拟器代码并没有流传出来而已。
 
-4. 在硬件选型的过程中，其实我最中意的是瑞芯微的芯片，但无奈他们家的产品在QEMU模拟器中并不支持；然后我查看了QEMU支持的所有嵌入式芯片，发现除了树莓派、Intel、AMD，其它的芯片都不支持其中的显示加速、音视频编解码，有些芯片仅仅只支持了不加速的液晶屏显示、触摸屏、音频解码，还有些芯片只支持了串口、GPIO、SPI、I2C等基础的外设。所以没有选择，只有树莓派。
+4. 在硬件选型的过程中，其实我最中意的是瑞芯微的芯片，但无奈他们家的产品在QEMU模拟器中并不支持；然后我查看了QEMU支持的所有嵌入式芯片，发现除了Intel、AMD，其它的芯片都不支持其中的显示加速、音视频编解码（一开始我以为QEMU对博通VideoCore GPU会支持，后面发现只是模拟了核间通信，但此时我已经做完了这个项目的准备工作了），有些芯片仅仅只支持了不加速的液晶屏显示、触摸屏、音频解码，还有些芯片只支持了串口、GPIO、SPI、I2C等基础的外设。阴差阳错间，我选择了树莓派。
 
-5. 但树莓派也不是最完美的选项，最新的几款树莓派芯片都是64位的ARM，只能选用32位CPU的老版本；而且树莓派所使用的博通芯片的手册还是不公开的，能找到的资料也少，这对嵌入式开发很不利，但还好基本的外设寄存器地址还是能找到的，网上也能找到一些底层开发的教程；我刚毕业时也用过博通BCM2042和BCM20730蓝牙芯片，对博通也不是两眼一抹黑；尽管困难重重，但也要慢慢解决问题。
+5. 树莓派不是最理想的选项，最新的几款树莓派芯片都是64位的ARM；嵌入式当前流行32位CPU，所以我选择树莓派32位CPU的老版本；而且树莓派所使用的博通芯片的手册还是不公开的，能找到的资料也少，这对嵌入式开发很不利，但还好基本的外设寄存器地址还是能找到的，网上也能找到一些底层开发的教程；我刚毕业时也用过博通BCM2042和BCM20730蓝牙芯片，对博通也不是两眼一抹黑；尽管困难重重，但也要慢慢解决问题。
 
 6. 其它带有GPU的MCU芯片还有RK3399、RV1126、RK3588、RK3288、Exynos4412、DM6446等；全志的资料不公开，和博通一样，只面向大客户公开资料，所以也放弃使用全志芯片；海思的芯片也没找到模拟器，也就不用了。
 
@@ -208,10 +208,18 @@ Copyright (c) 2003-2022 Fabrice Bellard and the QEMU Project developers
   * 这个工程已下载到当前仓库根目录下，我也会将这个目录拷贝到msys64的家目录下，我会将里面的Makefile和自动运行改成和msys64适配，保证一个make命令就能编译程序，一个make run就能在QEMU中运行刚刚编译的程序。
   * 输出qemu所在位置和aarch64编译器所在位置的环境变量，这样就不用每次都写完整的路径了。
   * 打开家目录也就是msys64/home/jim/下的.bashrc，在里面末尾加上  
+
+``` shell
     export PATH=$PATH:/mingw64/bin  
     export PATH=$PATH:/mingw32/bin/gcc-linaro-7.5.0-2019.12-i686-mingw32_aarch64-linux-gnu/bin  
-  * 生效配置 source .bashrc
-  * 查看环境变量 echo $PATH，确认已经生效
+```
+
+  * 生效配置 source ~/.bashrc
+  * 查看环境变量，确认已经生效
+
+```shell
+    echo $PATH
+```
 
 2. 进入msys64 raspi3-tutorial源码目录，编译并运行
   * 源码我已经拷贝到msys64中，并且已经改了Makefile，能直接编译和运行，同时修改过以后的源码我也会在本仓重上传
@@ -590,5 +598,41 @@ sctlr_el1: 30D00800  tcr_el1: 0
   * https://github.com/raspberrypi/linux
   * Github链接如果打不开，则可以将链接放到Gitee里搜索，一般都有人上传镜像
 
-### 2）本地裸机工程介绍
+### 2）本地裸机项目介绍
 
+#### 1、硬件平台
+
+* 裸机项目使用QEMU模拟器
+* 树莓派模拟器介绍详见QEMU源码中的qemu\docs\system\arm\raspi.rst
+  * 支持的板子有：raspi0、raspi1a+、raspi2b、raspi3a+、raspi3b
+  * 支持的模块有：ARM核、GPU固件特性、ARM和GPU核间通信邮箱、中断控制、时钟与复位控制、定时器、GPIO、串口、随机数发生器、显示帧缓存、USB、SD卡、芯片温度传感器。
+  * 不支持的模块有：SPI、ADC、PWM、GPU
+  * 运行板子基础的命令有：qemu-system-aarch64 -M raspi3b
+  * QEMU和树莓派有关的源码细节：
+    * qemu\hw\arm\raspi.c
+    * qemu\include\hw\intc\bcm2835_ic.h, bcm2836_control.h
+    * qemu\include\hw\arm\bcm2836.h, bcm2835_peripherals.h
+
+```C
+#include "hw/char/pl011.h"
+#include "hw/char/bcm2835_aux.h"
+#include "hw/display/bcm2835_fb.h"
+#include "hw/dma/bcm2835_dma.h"
+#include "hw/intc/bcm2835_ic.h"
+#include "hw/misc/bcm2835_property.h"
+#include "hw/misc/bcm2835_rng.h"
+#include "hw/misc/bcm2835_mbox.h"
+#include "hw/misc/bcm2835_mphi.h"
+#include "hw/misc/bcm2835_thermal.h"
+#include "hw/misc/bcm2835_cprman.h"
+#include "hw/misc/bcm2835_powermgt.h"
+#include "hw/sd/bcm2835_sdhost.h"
+#include "hw/gpio/bcm2835_gpio.h"
+#include "hw/timer/bcm2835_systmr.h"
+```
+
+* *参考资料：*
+  * [QEMU 不模拟视频核心硬件;尝试通过 VCHIQ 与之交互的程序将失败](https://raspberrypi.stackexchange.com/questions/23127/failed-to-open-vchiq-instance-rpi-on-qemu-linux-kernel-mac)
+  * 
+
+#### 2、arch
