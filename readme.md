@@ -87,7 +87,7 @@
 ### 1）安装Linux环境
 
 * 可以在Windows下安装MSYS2，或者安装Cygwin，这都是Linux运行环境；如果安装了Git，里面也会自带精简版的MSYS2+MinGW64；如果你有已经安装过MSYS2环境的朋友，特别是他已经安装好了树莓派交叉编译工具和其它工具，你可以将他安装过的文件夹拷过来，在你的电脑上也同样可以点开即用，换句话说就是安装过一次以后的MSYS2是绿色软件，只是文件比较大，会有几十G。
-* 也可以先安装VMware Player虚拟机，然后在虚拟机中安装Ubuntu系统，这是一个Linux发行版；直接使用Linux系统，安装软件的教程和各种资料会比MingW更方便；如果你有已经在虚拟机中安装过Linux的朋友，特别是他在已经安装好了树莓派交叉编译工具、QEMU和其它工具，你可以将他安装过的系统文件夹拷贝过来。
+* 也可以先安装VMware Player虚拟机，然后在虚拟机中安装Ubuntu系统，这是一个Linux发行版；直接使用Linux系统，安装软件的教程和各种资料会比MinGW更方便；如果你有已经在虚拟机中安装过Linux的朋友，特别是他在已经安装好了树莓派交叉编译工具、QEMU和其它工具，你可以将他安装过的系统文件夹拷贝过来。
 * 还可以使用双系统，或者干脆准备一台装了Linux的电脑。
 
 ### 2）用QEMU模拟器运行树莓派
@@ -114,7 +114,7 @@
 
 ### 4）完整的环境安装步骤
 
-* 写在前面，我会提供已经安装好各种工具的MSYS2环境，如果你没用过Linux，建议你直接下载本系统压缩包cj_msys64.zip，解压后使用，或者自行使用VMware Player虚拟机+Ubuntu安装开发环境，因为MSYS2中安装软件的教程很难快速找到，需要有一些使用Linux的经验才知道怎么安装特定软件；我的MSYS2环境添加了32位和64位的交叉编译工具，他们的来源不一样，后面会详述。
+* 写在前面，我会提供已经安装好各种工具的MSYS2环境，如果你没用过Linux，建议你直接下载本系统压缩包cj_msys64.zip（该压缩包太大，有2G，暂未上传），解压后使用，或者自行使用VMware Player虚拟机+Ubuntu安装开发环境，因为MSYS2中安装软件的教程很难快速找到，需要有一些使用Linux的经验才知道怎么安装特定软件；我的MSYS2环境添加了32位和64位的交叉编译工具，他们的来源不一样，后面会详述。
 
 * 下面是从头到尾的工具软件安装步骤：
   * 推荐使用MSYS2 + 已经用MinGW32或MinGW64编译好的程序，基本上开发过程中你能在Linux下实现的，也都能在这个环境下实现，只是有些教程没有Ubuntu下那么好找；在MSYS2中不能使用Linux的程序，必须用MinGW将源码重新编译过后才能使用，这一般是软件供应商已经做好的。
@@ -222,7 +222,7 @@ Copyright (c) 2003-2022 Fabrice Bellard and the QEMU Project developers
 ```
 
 2. 进入msys64 raspi3-tutorial源码目录，编译并运行
-  * 源码我已经拷贝到msys64中，并且已经改了Makefile，能直接编译和运行，同时修改过以后的源码我也会在本仓重上传
+  * 源码我已经拷贝到msys64中，并且已经改了Makefile，能直接编译和运行，同时修改过以后的源码我也会在本仓重新上传
   * 源码路径 ~/raspi3-tutorial/01_bareminimum，也就是/home/jim/raspi3-tutorial/01_bareminimum，也就是D:\msys64\home\jim\raspi3-tutorial\01_bareminimum，后面所有的示例路径我都采用第一种写法。
   * 进入目录 cd ~/raspi3-tutorial/01_bareminimum
   * 编译 make
@@ -249,15 +249,15 @@ Copyright (c) 2003-2022 Fabrice Bellard and the QEMU Project developers
 * 树莓派里面有GPU和ARM CPU，GPU先上电运行，然后再引导ARM运行
 * 树莓派的GPU底层固件（Bootloader）是闭源的，但可以在此基础上引导自己的U-Boot、Linux kernel，也可以不用U-Boot和Linux，直接引导裸机程序或者RTOS；这种引导方式和Xilinx ZYNQ类似，ARM和FPGA一个先启动一个后启动。
 
-* 一些其它的树莓派嵌入式相关的开源仓库：
-(1) 运行在 Raspberry Pi 上的小型嵌入式系统
-- Xinu project ([xinu-os/xinu](https://link.zhihu.com/?target=https%3A//github.com/xinu-os/xinu))
-- Ultibo project ([ultibohub/Core](https://link.zhihu.com/?target=https%3A//github.com/ultibohub/Core))
+* 一些其它的树莓派嵌入式相关的开源仓库：  
+(1) 运行在 Raspberry Pi 上的小型嵌入式系统  
+- Xinu project ([xinu-os/xinu](https://link.zhihu.com/?target=https%3A//github.com/xinu-os/xinu)) 一个操作系统
+- Ultibo project ([ultibohub/Core](https://link.zhihu.com/?target=https%3A//github.com/ultibohub/Core)) 用Free Pascal编写的Raspberry Pi的全功能嵌入式（无操作系统）开发环境
 
-(2) 一些在 Raspberry Pi 上可以嵌入在其他系统中的运行库
+(2) 一些在 Raspberry Pi 上可以嵌入在其他系统中的运行库  
 - USPi([rsta2/uspi](https://link.zhihu.com/?target=https%3A//github.com/rsta2/uspi)), 一个小型的支持 USB 通讯的库
 
-(3) 以及其他一些基于 Raspberry Pi 裸机开发例子：
+(3) 以及其他一些基于 Raspberry Pi 裸机开发例子：  
 - Bare Metal Programming on Raspberry Pi 3：([bztsrc/raspi3-tutorial](https://link.zhihu.com/?target=https%3A//github.com/bztsrc/raspi3-tutorial))
 - Raspberry Pi ARM based bare metal examples ([dwelch67/raspberrypi](https://link.zhihu.com/?target=https%3A//github.com/dwelch67/raspberrypi))
 
@@ -583,7 +583,7 @@ sctlr_el1: 30D00800  tcr_el1: 0
   * [PeterLemon/RaspberryPi](https://gitee.com/mirrors_PeterLemon/RaspberryPi) ，https://github.com/PeterLemon/RaspberryPi
   * 上面的教程：主要是汇编，写了文件解码、音频播放、屏幕显示、绘图、播放视频等。
   * [rsta2/circle](https://github.com/rsta2/circle)
-  * 上面的教程：主要是C++写到树莓派裸机程序，很全，各个硬件模块的驱动都有
+  * 上面的教程：主要是用C++写的树莓派裸机程序，很全，各个硬件模块的驱动都有
   * [DexOS the game console OS](http://dex-os.github.io/) 一个用汇编写的操作系统
   * [DexBasic For the Raspberry pi](http://dex-os.github.io/DexBasic/DexBasic.htm) 一个树莓派汇编编译器
   * [A Raspberry Pi 3 (formerly Raspberry Pi 2 v1.1) based games console, including RTOS, GPU driver, SDK](https://jaystation2.maisonikkoku.com/) 树莓派GPU程序
@@ -599,6 +599,8 @@ sctlr_el1: 30D00800  tcr_el1: 0
   * Github链接如果打不开，则可以将链接放到Gitee里搜索，一般都有人上传镜像
 
 ### 2）本地裸机项目介绍
+
+* 裸机项目的详细介绍参见本仓库子文档：[嵌入式开源项目-CJ安防摄像机 裸机项目介绍](./src/readme.md)
 
 <center>表6 源文件结构与描述</center>
 
@@ -642,9 +644,16 @@ sctlr_el1: 30D00800  tcr_el1: 0
 
 #### 2、arch文件夹
 
-* 裸机源码目录和文件类型仿照Linux的风格来布置。
+* 裸机源码目录和文件类型仿照Linux的风格来布置，参考的具体Linux版本为2022-11-07 07:07打tag的linux_6.1-rc4版本。
+  * linux_6.1-rc4版本代码查看和下载路径：[Linux 6.1-rc4](https://gitee.com/mirrors/linux_old1/tree/v6.1-rc4)
 * arch文件夹里面存放和硬件相关的内容，能抽象出去的纯逻辑内容都会剥离出去。
 * 因为一个功能或者模块可能会被拆分为硬件相关和硬件无关的部分，所以其它文件夹里的.c/h文件，可能在arch文件夹内会有同名的文件存在。
 * 不像普通的单片机源码结构同名的.c源文件和.h头文件放在同一个文件夹内，这个裸机工程里源文件和头文件是放在不同的文件夹内的；头文件单独放在一起方便单独输出调用接口；这样在有需要时也方便对底层代码保密，用多了也就能对这种代码组织结构习惯了。
 * arch文件夹里面有汇编写的Boot代码，汇编先执行后再引导C语言的main()函数。
   * Cortex-A7汇编语言、关键字、伪指令和编码风格详见本仓库内的子文档：[《05_ARM Cortex-A7汇编介绍.md》](./doc/05_ARM Cortex-A7汇编介绍.md)
+
+#### 3、samples文件夹
+
+* 大量测试用例的工程都在samples文件夹中
+
+#### 4、
