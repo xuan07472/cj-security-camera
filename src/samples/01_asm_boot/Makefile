@@ -1,7 +1,7 @@
 
 ARMGNU ?= arm-none-eabi
 
-COPS = -Wall -O2 -nostdlib -nostartfiles -ffreestanding 
+COPS = -Wall -O2 -nostdinc -nostdlib -nostartfiles -ffreestanding 
 
 all : uart01.bin 
 
@@ -29,5 +29,6 @@ uart01.bin : loader vectors.o periph.o uart01.o
 	$(ARMGNU)-objcopy uart01.elf -O ihex uart01.hex
 	$(ARMGNU)-objcopy uart01.elf -O srec --srec-forceS3 uart01.srec
 	$(ARMGNU)-objcopy uart01.elf -O binary uart01.bin
-
-
+	$(ARMGNU)-objcopy uart01.elf -O binary kernel7.img
+run:
+	qemu-system-arm -M raspi2b -kernel kernel7.img -serial null -serial stdio

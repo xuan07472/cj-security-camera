@@ -106,9 +106,30 @@ $ tree -L 1
 
 ### 1）01_asm_boot
 
-* 汇编boot程序，引导C语言main函数执行；跳转到main之前要配置堆栈。
-* vector.s是整个ARM程序的入口，就像其它的8051或者ARM boot程序一样；这是CPU上电后复位中断执行的第一行代码所在处。
 * 该模块工程所在的目录为：cj-security-camera\src\samples\01_asm_boot
+* 作用：汇编boot程序，引导C语言main函数执行，并用串口1输出信息；跳转到main之前要配置堆栈。
+* 效果：
+
+```shell
+jim@DESKTOP-SVP3BEM MSYS /d/1_git/cj-security-camera/src/samples/01_asm_boot
+$  qemu-system-arm -M raspi2b -kernel kernel7.img -serial null -serial stdio
+12345678
+000114A8
+......
+00000448 E1A0F001
+```
+
+* 编译和运行步骤
+  * cd d:  先进入D盘
+  * cd 1_git/cj-security-camera/src/samples/01_asm_boot  再进入当前测试用例的目录
+  * make  编译
+  * makr run  运行
+
+* vector.s是整个ARM程序的入口，就像其它的8051或者ARM boot程序一样；这是CPU上电后复位中断执行的第一行代码所在处。
 * 该模块内源码参考自：https://gitee.com/mirrors_dwelch67/raspberrypi/tree/master/boards/pi2/SVC_BOOT/uart01 ，或者https://github.com/dwelch67/raspberrypi/tree/master/boards/pi2/SVC_BOOT/uart01
+
+
+
+
 
 

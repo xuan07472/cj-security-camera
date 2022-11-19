@@ -1,3 +1,8 @@
+;;
+; File format: UTF-8
+; 原始代码来自于 https://gitee.com/mirrors_dwelch67/raspberrypi/tree/master/boards/pi2/SVC_BOOT/uart01
+; 或者https://github.com/dwelch67/raspberrypi/tree/master/boards/pi2/SVC_BOOT/uart01
+;;
 
 See the top level README for information on where to find documentation
 for the raspberry pi and the ARM processor inside.  Also find information
