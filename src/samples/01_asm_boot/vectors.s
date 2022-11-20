@@ -1,91 +1,141 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; \brief	汇编boot文件
-; \note		File format: UTF-8
-; \author	注释作者：将狼才鲸
-; \date		注释日期：2022-11-20
-; \note		参考网址：
-;			[常见的GNU汇编伪指令](https://blog.csdn.net/oqqHuTu12345678/article/details/125694068)
-;			[Using as The gnu Assembler] GNU官方文档的“7.59 .space size , fill”小节
-;			[协处理器CP15介绍—MCR/MRC指令](https://blog.csdn.net/daocaokafei/article/details/114292514)
-;			[DUI0588B_assembler_reference.pdf] ARM官方文档的“3.58 MRC, MRC2, MRRC and MRRC2”
-;			[DDI0464F_cortex_a7_mpcore_r0p5_trm.pdf] ARM官方文档的“4.2.1 c0 registers”和4.3.1 Main ID Register
-;			[ARM数据处理指令——逻辑运算指令](https://www.csdn.net/tags/NtDakg0sNTMyMzUtYmxvZwO0O0OO0O0O.html)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+/*******************************************************************************
+ * \brief	汇编boot文件
+ * \note	File format: UTF-8
+ * \note	GNU汇编不能使用;分号做注释，但可以用;@，分号+@；行注释和块注释和C语言一样，
+ *			行注释还可以是@、#
+ * \author	注释作者：将狼才鲸
+ * \date	注释日期：2022-11-20
+ * \note	参考网址：
+ *			[常见的GNU汇编伪指令](https://blog.csdn.net/oqqHuTu12345678/article/details/125694068)
+ *			[Using as The gnu Assembler] GNU官方文档的“7.59 .space size , fill”小节
+ *			[协处理器CP15介绍—MCR/MRC指令](https://blog.csdn.net/daocaokafei/article/details/114292514)
+ *			[DUI0588B_assembler_reference.pdf] ARM官方文档的“3.58 MRC, MRC2, MRRC and MRRC2”
+ *			[DDI0464F_cortex_a7_mpcore_r0p5_trm.pdf] ARM官方文档的“4.2.1 c0 registers”
+ *				和“4.3.5 Multiprocessor Affinity Register”
+ *			[ARM数据处理指令——逻辑运算指令](https://www.csdn.net/tags/NtDakg0sNTMyMzUtYmxvZwO0O0OO0O0O.html)
+ *			[【ARM学习笔记】ARM汇编指令：B、BL、BX、BLX的区别](https://blog.csdn.net/szullc/article/details/122333827)
+ *			[汇编 cmp_【干货分享】从0开始学ARM，ARM汇编指令原来如此简单]
+ *				(https://blog.csdn.net/weixin_39638623/article/details/111344950)
+ *			[arm汇编之 bne与beq](https://blog.csdn.net/fanrwx/article/details/56048933)
+ *			[ARM 汇编中的 “B .“ 语句意义](https://blog.csdn.net/weixin_44058570/article/details/120265946)
+ *			[ARM 汇编指令 ADR 与 LDR 使用](https://blog.csdn.net/Emily_rong_2021/article/details/122435714)
+ *			[ARM的ADN指令和ANDS指令有什么不同？](https://bbs.csdn.net/topics/390748485)
+ ******************************************************************************/
 
-; 给_start一个外部链接属性，类似于C语言的extern
-.globl _start	; _start是一个系统默认的起始函数名
+/* 具体boot时的ARM中断向量表、reset复位中断被GPU的boot程序预先配置了？ */
 
-; 冒号前的是标号，也是函数名
+/* 给_start一个外部链接属性，类似于C语言的extern */
+.globl _start	/* _start是一个系统默认的起始函数名？ */
+
+/* 冒号前的是标号，也是函数名 */
+/*
+ * \brief	4个CPU核共用的复位中断函数，会进入4次？
+ */
 _start:
-    b skip				; 跳转到skip函数
+    b skip	/* 跳转到skip函数 */
 
-; 将当前区域的0x1000-0x4长度的内容用0填充
-.space 0x1000-0x4,0
+/* 将当前区域的0x1000-0x4长度的内容用0填充 */
+.space 0x1000 - 0x4, 0
 
-;;
-; \brief 名为skip的函数，
+/*
+ * \brief 名为skip的函数，从CPU寄存器判断哪个CPU核，分别执行不同的boot流程
+ */
 skip:
-	; 判断芯片的型号，是ARMv6的树莓派1，还是ARMv7的树莓派2，还是ARMv8的树莓派3
-	; 第一个参数固定为p15，协处理器的固定操作码0，第三个ARM寄存器，第四个CP15协处理器寄存器，协处理器附加寄存器，协处理器操作码
-    mrc p15,0,r0,c0,c0,5	; 5操作码指的是MPIDR ; CP15存储类协处理器读数据到ARM CPU，获取Aliases of Main ID Register
-    mov r1,#0xFF			; r1 = 0xFF
-    ands r1,r1,r0			; r1 = r1 & r0
-    bne not_zero
+	/* 第一个参数固定为p15，协处理器的固定操作码0，第三个ARM寄存器，第四个CP15  协处理器寄存器，协处理器附加寄存器，协处理器操作码 */
+    mrc p15, 0, r0, c0, c0, 5	/* 5操作码+r0指的是MPIDR ; CP15存储类协处理器读数据到ARM CPU，获取Multiprocessor Affinity Register */
+    mov r1, #0xFF				/* r1 = 0xFF */
+    ands r1, r1, r0				/* r1 = r1 & r0，r1只保留r0的低8位 */
+	/* "4.3.5 Multiprocessor Affinity Register" of DDI0464F_cortex_a7_mpcore_r0p5_trm.pdf
+	 * r0里当前存放的是MPIDR寄存器，bit0~1是CPU ID，指示CPU单核~4核；bit8~11存放Cluster ID，
+	 * 和MT、U一起指示是否是多CPU架构、多线程。
+	 */
+    bne not_zero				/* 如果上面语句r1 & r0 != 0，程序跳转到not_zero处；如果是CPU1、2、3则跳转，如果是是CPU0则继续往下执行 */
+	/*
+	 * 如果是CPU0则会往下执行，如果是CPU1、2、3则会在上面调用的函数中死循环
+	 * "5.14 Load and store multiple instructions available in ARM and Thumb" of DUI0473C_using_the_arm_assembler.pdf
+	 * The stack pointer (SP) is the base register, and is always updated.
+	 * "Example 5-7 Block copy using LDM and STM" of DUI0473C_using_the_arm_assembler.pdf
+	 */
+    mov sp, #0x8000			/* sp是stack栈顶指针，用于函数参数的压栈和弹栈，也存放函数指针 */
+    bl notmain				/* CPU0跳转到notmain函数，函数带返回 */
 
-    mov sp,#0x8000
-    bl notmain
-hang: b hang
+/*
+ * \brief	所有函数执行完之后的死循环，将CPU卡住
+ */
+hang: b hang				/* 跳转到hang函数，函数无返回；main函数执行完之后进入死循环 */
 
+/*
+ * \brief		BCM2826初始化后面3个CPU核
+ * \param[in]	r1：MPIDR寄存器中低字节值，bit0~1是CPU ID，指示CPU单核~4核中的哪一个
+ */
 not_zero:
-    cmp r1,#1
-    beq core_one
-    cmp r1,#2
+	/* 第二个操作数如果是立即数，bit:[11-8]表示操作数向左移动的位数 / 2, bit:[7-0]表示最终的操作数；
+	   比较r1和立即数1，结果为0或者非0，将结果存到cpsr寄存器相应的condition位 */
+    cmp r1, #1		/* 如果是第2个CPU核 */
+    beq core_one	/* 如果r1 == 1，跳转到core_one */
+    cmp r1, #2		/* 如果是第3个CPU核 */
     beq core_two
-    cmp r1,#3
+    cmp r1, #3		/* 如果是第4个CPU核 */
     beq core_three
-    b .
+    b .				/* 跳转到本行，死循环，当前CPU的主函数退出后卡在这里 */
 
+/*
+ * \brief	cpu1执行栈顶的函数
+ * \param[in, out]	r0：输入为MPIDR寄存器中的值，输出为栈顶的函数地址
+ */
 core_one:
-ldr r1,=0x1000
-str r0,[r1]
-    mov sp,#0x6000
-    mov r1,#0
-    str r1,[sp]
+	ldr r1, =0x1000 /* 将0x1000转换为绝对地址后赋值为r1；这个值能控制当前是CPU1？ */
+	str r0, [r1]	/* 将r0中的数据放入到r1存储的地址中去 */
+    mov sp, #0x6000	/* 赋值CPU核1的stack栈顶地址 */
+    mov r1, #0		/* r1 = 0 */
+    str r1, [sp]	/* *SP = 0 */
 core_one_loop:
-    ldr r0,[sp]
-    cmp r0,#0
-    beq core_one_loop
-    bl hopper
-    b hang
+    ldr r0, [sp]	/* r0 = &sp */
+    cmp r0, #0		/* if (r0 == 0) */
+    beq core_one_loop	/* 如果CPU1栈顶没有代码，则一直在此死循环 */
+    bl hopper		/* 跳转到sp栈顶函数的地址 */
+    b hang			/* 只是让CPU1进入死循环？不影响其它CPU运行？ */
 
+/*
+ * \brief	cpu2执行栈顶的函数
+ * \param[in, out]	r0：输入为MPIDR寄存器中的值，输出为栈顶的函数地址
+ */
 core_two:
-ldr r1,=0x1004
-str r0,[r1]
-    mov sp,#0x4000
-    mov r1,#0
-    str r1,[sp]
+	ldr r1, =0x1004
+	str r0, [r1]
+    mov sp, #0x4000
+    mov r1, #0
+    str r1, [sp]
 core_two_loop:
-    ldr r0,[sp]
-    cmp r0,#0
+    ldr r0, [sp]
+    cmp r0, #0
     beq core_two_loop
     bl hopper
     b hang
 
+/*
+ * \brief	cpu3执行栈顶的函数
+ * \param[in, out]	r0：输入为MPIDR寄存器中的值，输出为栈顶的函数地址
+ */
 core_three:
-ldr r1,=0x1008
-str r0,[r1]
-    mov sp,#0x2000
-    mov r1,#0
-    str r1,[sp]
+	ldr r1, =0x1008
+	str r0, [r1]
+    mov sp, #0x2000
+    mov r1, #0
+    str r1, [sp]
 core_three_loop:
-    ldr r0,[sp]
-    cmp r0,#0
+    ldr r0, [sp]
+    cmp r0, #0
     beq core_three_loop
     bl hopper
     b hang
 
+/*
+ * \brief	跳转到sp栈顶的函数地址
+ * \param[in]	r0：sp栈顶指针
+ */
 hopper:
-    bx r0
+    bx r0		/* 跳转到sp栈顶的函数地址，可以跳转到ARM指令集也可以跳转到Thumb指令集 */
 
 
 .globl PUT32
@@ -144,11 +194,6 @@ GETSCTLR:
 GETMPIDR:
     mrc p15,0,r0,c0,c0,5 ;@ MPIDR
     bx lr
-
-
-;@-------------------------------------------------------------------------
-;@-------------------------------------------------------------------------
-
 
 ;@-------------------------------------------------------------------------
 ;@
