@@ -34,4 +34,3 @@ but instead from 0x0000, the second line says please do not trash
 the first few hundred bytes with ATAG or device tree information.
 Without that second line it loads kernel7.img then writes the ATAG
 information assuming you have left a gap and branched over.
-

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * \brief	汇编boot文件
+ * \brief	汇编boot，和一些必须要用汇编实现的函数接口
  * \note	File format: UTF-8
  * \note	GNU汇编不能使用;分号做注释，但可以用;@，分号+@；行注释和块注释和C语言一样，
  *			行注释还可以是@、#
@@ -20,9 +20,11 @@
  *			[ARM 汇编中的 “B .“ 语句意义](https://blog.csdn.net/weixin_44058570/article/details/120265946)
  *			[ARM 汇编指令 ADR 与 LDR 使用](https://blog.csdn.net/Emily_rong_2021/article/details/122435714)
  *			[ARM的ADN指令和ANDS指令有什么不同？](https://bbs.csdn.net/topics/390748485)
+ *			[ARM汇编指令：STRH指令、STRB指令、STR指令、LDR指令、LDRH]
+ *				(https://wenku.baidu.com/view/47145ae8a2c7aa00b52acfc789eb172ded6399c3.html)
  ******************************************************************************/
 
-/* 具体boot时的ARM中断向量表、reset复位中断被GPU的boot程序预先配置了？ */
+/* 最前面的代码是reset复位中断入口，后面紧跟着的是其它中断的入口，但是后面的中断处理在当前都省略了没添加 */
 
 /* 给_start一个外部链接属性，类似于C语言的extern */
 .globl _start	/* _start是一个系统默认的起始函数名？ */
@@ -66,6 +68,7 @@ hang: b hang				/* 跳转到hang函数，函数无返回；main函数执行完�
 
 /*
  * \brief		BCM2826初始化后面3个CPU核
+ * \details		也可以不实现CPU1~3的程序跳转，直接只执行上面的代码即可
  * \param[in]	r1：MPIDR寄存器中低字节值，bit0~1是CPU ID，指示CPU单核~4核中的哪一个
  */
 not_zero:
@@ -137,62 +140,81 @@ core_three_loop:
 hopper:
     bx r0		/* 跳转到sp栈顶的函数地址，可以跳转到ARM指令集也可以跳转到Thumb指令集 */
 
-
-.globl PUT32
+/*
+ * \brief		写寄存器
+ * \details		这个函数会在别的文件中调用
+ * \param[in]	r0，要写的寄存器地址
+ * \param[in]	r1，要写入的寄存器值
+ */
+.globl PUT32		/* extern void PUT32(unsigned int *r0, unsigned int r1); */
 PUT32:
-    str r1,[r0]
-    bx lr
+    str r1, [r0]	/* *r0 = r1 */
+    bx lr			/* return; 函数返回 */
 
-.globl PUT16
+/*
+ * \brief
+ */
+.globl PUT16		/* extern void PUT16(unsigned int *r0, unsigned int r1); */
 PUT16:
-    strh r1,[r0]
-    bx lr
+    strh r1, [r0]	/* *r0 = r1 &0x0000FFFF */
+    bx lr			/* return */
 
-.globl PUT8
+.globl PUT8			/* extern void PUT8(unsigned int *r0, unsigned int r1); */
 PUT8:
-    strb r1,[r0]
+    strb r1, [r0]	/* *r0 = r1 &0x000000FF */
     bx lr
 
-.globl GET32
+/*
+ * \brief	读取寄存器
+ * \param[in]	r0：输入的地址
+ * \return		r0：返回读取的值
+ */
+.globl GET32		/* extern unsigned int GET32( unsigned int *r0); */
 GET32:
-    ldr r0,[r0]
+    ldr r0, [r0]	/* r0 = *r0 */
     bx lr
 
-.globl GETPC
+/* 获取当前PC地址 */
+.globl GETPC		/* extern unsigned int GETPC(void); */
 GETPC:
-    mov r0,lr
+    mov r0, lr
     bx lr
 
+/* 该函数未被调用 */
 .globl BRANCHTO
 BRANCHTO:
     mov r12,#0
     mcr p15, 0, r12, c7, c10, 1
-    dsb
+    dsb	/* 数据同步隔离，保证前面的数据读写都完成；类似于fflush(stdio) */
     mov r12, #0
     mcr p15, 0, r12, c7, c5, 0
     mov r12, #0
     mcr p15, 0, r12, c7, c5, 6
     dsb
-    isb
+    isb	/* 指令同步隔离，保证前面所有的指令都已执行完毕 */
     bx r0
 
-.globl dummy
+/* 空函数，用作延时 */
+.globl dummy	/* extern void dummy(unsigned int r0); */
 dummy:
     bx lr
 
-.globl GETCPSR
+/* 获取CPSR寄存器 */
+.globl GETCPSR	/* extern unsigned int GETCPSR(void); */
 GETCPSR:
-    mrs r0,cpsr
+    mrs r0, cpsr
     bx lr
 
-.globl GETSCTLR
+/* 获取SCTLR寄存器 */
+.globl GETSCTLR	/* extern unsigned int GETSCTLR(void); */
 GETSCTLR:
-    mrc p15,0,r0,c1,c0,0
+    mrc p15, 0, r0, c1, c0, 0
     bx lr
 
-.globl GETMPIDR
+/* 获取MPIDR寄存器 */
+.globl GETMPIDR	/* extern unsigned int GETMPIDR(void); */
 GETMPIDR:
-    mrc p15,0,r0,c0,c0,5 ;@ MPIDR
+    mrc p15, 0, r0, c0, c0, 5 ;@ MPIDR
     bx lr
 
 ;@-------------------------------------------------------------------------

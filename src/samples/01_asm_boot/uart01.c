@@ -1,6 +1,6 @@
-
-//-------------------------------------------------------------------------
-//-------------------------------------------------------------------------
+/*******************************************************************************
+ * \brief	串口打印消息
+ ******************************************************************************/
 
 // 2  outer corner
 // 4
@@ -8,35 +8,38 @@
 // 8  TX out
 // 10 RX in
 
-extern void PUT32 ( unsigned int, unsigned int );
-extern void PUT16 ( unsigned int, unsigned int );
-extern void PUT8 ( unsigned int, unsigned int );
-extern unsigned int GET32 ( unsigned int );
-extern unsigned int GETPC ( void );
-extern unsigned int GETCPSR ( void );
-extern unsigned int GETSCTLR ( void );
-extern unsigned int GETMPIDR ( void );
-extern void BRANCHTO ( unsigned int );
-extern void dummy ( unsigned int );
+/* 函数声明 */
+extern void PUT32(unsigned int, unsigned int);
+extern void PUT16(unsigned int, unsigned int);
+extern void PUT8(unsigned int, unsigned int);
+extern unsigned int GET32(unsigned int);
+extern unsigned int GETPC(void);
+extern unsigned int GETCPSR(void);
+extern unsigned int GETSCTLR(void);
+extern unsigned int GETMPIDR(void);
+extern void BRANCHTO(unsigned int);
+extern void dummy(unsigned int);
 
-extern void uart_init ( void );
-extern unsigned int uart_lcr ( void );
-extern void uart_flush ( void );
-extern void uart_send ( unsigned int );
-extern unsigned int uart_recv ( void );
-extern unsigned int uart_check ( void );
-extern void hexstring ( unsigned int );
-extern void hexstrings ( unsigned int );
-extern void timer_init ( void );
-extern unsigned int timer_tick ( void );
+extern void uart_init(void);
+extern unsigned int uart_lcr(void);
+extern void uart_flush(void);
+extern void uart_send(unsigned int);
+extern unsigned int uart_recv(void);
+extern unsigned int uart_check(void);
+extern void hexstring(unsigned int);
+extern void hexstrings(unsigned int);
+extern void timer_init(void);
+extern unsigned int timer_tick(void);
 
-extern void timer_init ( void );
-extern unsigned int timer_tick ( void );
+extern void timer_init(void);
+extern unsigned int timer_tick(void);
 
-extern void leds_off ( void );
+extern void leds_off(void);
 
-//------------------------------------------------------------------------
-int notmain ( void )
+/*
+ * \brief	C语言主函数，串口打印消息
+ */
+int notmain(void)
 {
     unsigned int ra;
     unsigned int rb;
@@ -52,24 +55,18 @@ int notmain ( void )
     hexstring(GET32(0x1004));
     hexstring(GET32(0x1008));
 
-if(1)
-{
-    for(ra=0x000;ra<0x1000;ra+=4)
-    {
-        rb=GET32(ra);
-        if(rb)
-        {
-            hexstrings(ra); hexstring(rb);
-        }
-    }
-}
-
+	if (1) {
+		for (ra= 0x000; ra < 0x1000 ; ra += 4) {
+			rb = GET32(ra);
+			if (rb) {
+				hexstrings(ra);
+				hexstring(rb);
+			}
+		}
+	}
 
     return(0);
 }
-//-------------------------------------------------------------------------
-//-------------------------------------------------------------------------
-
 
 //-------------------------------------------------------------------------
 //
