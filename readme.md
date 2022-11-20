@@ -17,8 +17,8 @@
 |**软硬件资源**|详情|备注|
 |---|---|---|
 |QEMU BCM2836芯片模拟器|900MHz 4核 ARM Cortex-A7 CPU, VideoCore IV 双核 GPU (2D 3D显示加速, 视频编解码), 1GB 内存, 100M以太网, HDMI显示, USB2.0 x 4, SD卡, 音频输出, GPIO, 摄像头输入, 液晶屏接口, 串口, SPI, I2C等嵌入式通用模块|树莓派2B同款硬件|
-|**硬件模块测试用例：raspi3-tutorial**|裸机程序，包含让CPU运行的空程序、串口打印、屏幕图像输出、屏幕文字输出、读写SD卡、bootloader|在仓库根目录raspi3-tutorial文件夹中, 开箱即用, 直接make, 直接在QEMU中运行|
-|**裸机项目**|......进行中......||
+|**硬件模块测试用例：raspi3-tutorial**|裸机程序，包含让CPU运行的空程序、串口打印、屏幕图像输出、屏幕文字输出、读写SD卡、bootloader|树莓派3B同款硬件BCM2837，在仓库根目录raspi3-tutorial文件夹中, 开箱即用, 直接make, 直接在QEMU中运行|
+|**裸机项目**|汇编boot，串口打印，......进行中......|树莓派2B同款硬件BCM2836|
 |**RTOS项目**|......未开始......||
 |**Linux项目**|......未开始......||
 |**使用的开源库**|||
@@ -525,6 +525,7 @@ sctlr_el1: 30D00800  tcr_el1: 0
   * BCM2836外设：[bcm2836-peripherals.pdf](https://datasheets.raspberrypi.com/bcm2836/bcm2836-peripherals.pdf)
   * BCM2836 ARM Cortex-A7 MPCore技术参考手册：[Cortex-A7 MPCore Technical Reference Manual](https://documentation-service.arm.com/static/602cf701083323480d479d18?token=)
   * BCM2835 ARM11内核：[ARM1176JZF-S Technical Reference Manual r0p7](https://documentation-service.arm.com/static/5e8e294efd977155116a6ca3?token=)
+  * ARM汇编文档：[ARM®  Compiler toolchain v5.02 for µVision]()https://developer.arm.com/documentation/dui0588/latest/
 
 * 芯片的Boot
   * 芯片的Boot在E2PROM中，是给GPU用的，GPU先启动，然后在引导ARM；Boot固件可以用工具更新，但它是闭源的
@@ -606,7 +607,10 @@ sctlr_el1: 30D00800  tcr_el1: 0
 
 |文件夹|文件名|作用|描述|
 |---|---|---|---|
-|arch||硬件相关||
+|arch||硬件相关源码的文件夹||
+|samples||单元测试用例所在的文件夹|验证某项功能是否已实现|
+|samples/01_asm_boot||BCM2836的汇编boot和串口输出||
+|||……||
 
 #### 1、硬件平台
 
@@ -650,10 +654,11 @@ sctlr_el1: 30D00800  tcr_el1: 0
 * 因为一个功能或者模块可能会被拆分为硬件相关和硬件无关的部分，所以其它文件夹里的.c/h文件，可能在arch文件夹内会有同名的文件存在。
 * 不像普通的单片机源码结构同名的.c源文件和.h头文件放在同一个文件夹内，这个裸机工程里源文件和头文件是放在不同的文件夹内的；头文件单独放在一起方便单独输出调用接口；这样在有需要时也方便对底层代码保密，用多了也就能对这种代码组织结构习惯了。
 * arch文件夹里面有汇编写的Boot代码，汇编先执行后再引导C语言的main()函数。
-  * Cortex-A7汇编语言、关键字、伪指令和编码风格详见本仓库内的子文档：[《05_ARM Cortex-A7汇编介绍.md》](./doc/05_ARM Cortex-A7汇编介绍.md)
+  * Cortex-A7汇编语言、关键字、伪指令和编码风格详见本仓库内的子文档：[《05_ARM Cortex-A7汇编语言和GNU伪指令介绍.md》](./doc/05_ARM Cortex-A7汇编语言和GNU伪指令介绍.md)
 
 #### 3、samples文件夹
 
 * 大量测试用例的工程都在samples文件夹中
+* 已实现的有汇编boot，串口输出，
 
 #### 4、

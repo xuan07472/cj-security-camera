@@ -1,4 +1,4 @@
-# ARM Cortex-A7汇编语言和指令介绍
+# ARM Cortex-A7汇编语言、GNU伪指令和链接脚本介绍
 
 |作者|将狼才鲸|
 |---|---|
@@ -37,3 +37,33 @@
   * [armv7-A系列9-arm硬件汇编指令](https://zhuanlan.zhihu.com/p/362826125)
   * [AMRv9影响下一个十年！一文了解ARM指令集发展史](https://view.inews.qq.com/k/20210408A09TI600)
   * [ARM-汇编指令集（总结）](https://zhuanlan.zhihu.com/p/164415889)
+
+## 三、ARM汇编关键字、GNU伪指令和链接脚本介绍
+
+<center>表1  ARM汇编关键字和GNU伪指令</center>
+
+|关键字|作用|举例|
+|---|---|---|
+|arm-none-eabi-ld -T|链接器指定链接脚本文件|arm-none-eabi-ld -T link.ld|
+|MEMORY{}|指定内存区域|MEMORY{ram:ORIGIN=0x0000,LENGTH=0x1000000}|
+|ram:|指定ram大小||
+|ORIGIN=0xXX|指定RAM起始地址|ORIGIN=0x0000|
+|LENGTH=0xXXXXXXXX|指定RAM长度|LENGTH=0x1000000|
+|SECTIONS{}|指定段，如代码段||
+|*|匹配任意长度的字符|*(.text*)|
+|> ram|将段放到内存中|.text : { *(.text*) } > ram|
+|.text|只读的代码段||
+|.bss|未初始化的全局变量段||
+|.globl xxx|给xxx一个外部属性，类似于C语言的extern|.globl _start|
+|xxx:|标号，也是函数名|_start:|
+|b xxx|跳转指令|b start|
+|.space 0xXX,0|将当前区域的0xxx长度的内容用0填充|.space 0x1000-0x4,0|
+|mrc|将CP15存储类协处理器的寄存器读到ARM中|mrc p15,0,r0,c0,c0,5|
+|mov|将后面的值赋给前面的变量|mov r1,#0xFF|
+|ANDS R0,R1,#0x01|R0=R1&0x01||
+||||
+||||
+||||
+
+
+

@@ -1,17 +1,35 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; \brief	汇编boot文件
+; \note		File format: UTF-8
+; \author	注释作者：将狼才鲸
+; \date		注释日期：2022-11-20
+; \note		参考网址：
+;			[常见的GNU汇编伪指令](https://blog.csdn.net/oqqHuTu12345678/article/details/125694068)
+;			[Using as The gnu Assembler] GNU官方文档的“7.59 .space size , fill”小节
+;			[协处理器CP15介绍—MCR/MRC指令](https://blog.csdn.net/daocaokafei/article/details/114292514)
+;			[DUI0588B_assembler_reference.pdf] ARM官方文档的“3.58 MRC, MRC2, MRRC and MRRC2”
+;			[DDI0464F_cortex_a7_mpcore_r0p5_trm.pdf] ARM官方文档的“4.2.1 c0 registers”和4.3.1 Main ID Register
+;			[ARM数据处理指令——逻辑运算指令](https://www.csdn.net/tags/NtDakg0sNTMyMzUtYmxvZwO0O0OO0O0O.html)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;@-------------------------------------------------------------------------
-;@-------------------------------------------------------------------------
+; 给_start一个外部链接属性，类似于C语言的extern
+.globl _start	; _start是一个系统默认的起始函数名
 
-.globl _start
+; 冒号前的是标号，也是函数名
 _start:
-    b skip
+    b skip				; 跳转到skip函数
 
+; 将当前区域的0x1000-0x4长度的内容用0填充
 .space 0x1000-0x4,0
 
+;;
+; \brief 名为skip的函数，
 skip:
-    mrc p15,0,r0,c0,c0,5 ;@ MPIDR
-    mov r1,#0xFF
-    ands r1,r1,r0
+	; 判断芯片的型号，是ARMv6的树莓派1，还是ARMv7的树莓派2，还是ARMv8的树莓派3
+	; 第一个参数固定为p15，协处理器的固定操作码0，第三个ARM寄存器，第四个CP15协处理器寄存器，协处理器附加寄存器，协处理器操作码
+    mrc p15,0,r0,c0,c0,5	; 5操作码指的是MPIDR ; CP15存储类协处理器读数据到ARM CPU，获取Aliases of Main ID Register
+    mov r1,#0xFF			; r1 = 0xFF
+    ands r1,r1,r0			; r1 = r1 & r0
     bne not_zero
 
     mov sp,#0x8000
