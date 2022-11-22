@@ -103,6 +103,7 @@
 ### 3）编译树莓派程序
 
 * 树莓派交叉编译工具可以在Windows下安装，也可以在Linux下安装。
+  * 如果是在Linux下开发，则进入树莓派Github的tools仓库，下载这个文件夹，解压后添加环境变量即可使用；如果你以前用Linux开发过arm，也可以自行去ARM官网或者Linaro官网下载，编译程序的效果是一样的。
 
 * *参考网址：*
   * [树莓派基础之交叉编译](https://blog.csdn.net/weixin_55374007/article/details/126697371)
@@ -111,6 +112,7 @@
   * [Windows下建立第一个树莓派应用程序-交叉编译](https://blog.csdn.net/yhhdll0107/article/details/123571694)
   * [在window上如何搭建树莓派4b的RT-Thread开发环境](https://www.yisu.com/zixun/528265.html)
   * [在Windows下使用C语言开始Raspberry Pi Pico开发](https://www.lexsion.com/index.php/archives/199/)
+  * [树莓派开发 --- 交叉编译工具](https://blog.csdn.net/qq_42047245/article/details/124936210)
 
 ### 4）完整的环境安装步骤
 
@@ -165,11 +167,11 @@ Copyright (c) 2003-2022 Fabrice Bellard and the QEMU Project developers
 #### 4.3 MSYS2中安装32位和64位ARM交叉编译工具
 
 * 一些工具介绍：
-  * 树莓派提供了在Linux下使用的交叉工具包的文件夹名为gcc-linaro-arm-linux-gnueabihf-raspbian-x64，使用的编译器名为arm-linux-gnueabihf-gcc，下载地址[raspberrypi-tools/ arm-bcm2708](https://gitee.com/qianchenzhumeng/raspberrypi-tools/tree/master/arm-bcm2708)。
-  * GNU官方提供了树莓派在Windows中使用的交叉工具包，默认的工具是使用Visual Studio +  VisualGDB来进行编译的。  
+  * （当前不用）树莓派提供了在Linux下使用的交叉工具包的文件夹名为gcc-linaro-arm-linux-gnueabihf-raspbian-x64，使用的编译器名为arm-linux-gnueabihf-gcc，下载地址[raspberrypi-tools/ arm-bcm2708](https://gitee.com/qianchenzhumeng/raspberrypi-tools/tree/master/arm-bcm2708)。
+  * （不用）GNU官方提供了树莓派在Windows中使用的交叉工具包，默认的工具是使用Visual Studio +  VisualGDB来进行编译的。  
   32位地址：[Prebuilt Windows Toolchain for Raspberry Pi](https://gnutoolchains.com/raspberry/)  
   64位地址：[Prebuilt Windows Toolchain for Raspberry Pi (64-bit)](https://gnutoolchains.com/raspberry64/)  
-  * ARM在Windows下自带的交叉编译工具为gcc-arm-none-eabi-10.3-2021.10-win32.exe，网页路径在https://developer.arm.com/downloads/-/gnu-rm ，交叉编译工具名为arm-none-eabi-gcc，我们不使用树莓派自带的交叉编译工具，而直接使用ARM的；因为树莓派没有直接给出MinGW下的交叉编译工具，而我也不想在Cygwin环境使用树莓派的Linux交叉编译工具。
+  * （不用）ARM在Windows下自带的交叉编译工具为gcc-arm-none-eabi-10.3-2021.10-win32.exe，网页路径在https://developer.arm.com/downloads/-/gnu-rm ，交叉编译工具名为arm-none-eabi-gcc，我们不使用树莓派自带的交叉编译工具，而直接使用ARM的；因为树莓派没有直接给出MinGW下的交叉编译工具，而我也不想在Cygwin环境使用树莓派的Linux交叉编译工具。
 
 * 但也不在ARM官方下载，我们在MSYS2中同样也能找到：在https://packages.msys2.org/base 中能搜到mingw-w64-arm-none-eabi-gcc和mingw-w64-arm-none-eabi-gdb
   * MSYS2下载命令 pacman -S mingw-w64-x86_64-arm-none-eabi-gcc，大小有1.24 GB，参考网址：[Package: mingw-w64-x86_64-arm-none-eabi-gcc](https://packages.msys2.org/package/mingw-w64-x86_64-arm-none-eabi-gcc?repo=mingw64)
@@ -569,7 +571,7 @@ sctlr_el1: 30D00800  tcr_el1: 0
 * Boot流程介绍：
   * 一般ARM芯片从0地址启动，而0地址默认是复位中断的入口，写了复位中断处理程序后，进一步向下执行就是配置堆和栈的地址与大小，配置系统频率、DDR内存，跳转到C语言Main()函数执行。
   * 而BCM2836是GPU先运行，并且GPU的Boot程序是闭源的，所以是GPU从0地址开始跑；
-  * GPU先运行bootcode.bin这个程序，再引导start.elf程序运行，然后再引导kernel8.img这个ARM程序运行，ARM程序运行的起始地址是固定的0x80000，所以写ARM裸机程序的时候第一个代码段要指定到这个地址。
+  * GPU先运行bootcode.bin这个程序，再引导start.elf程序运行，然后再引导kernel8.img这个ARM程序运行，ARM程序运行的起始地址是固定的0x8000，所以写ARM裸机程序的时候第一个代码段要指定到这个地址。
   * 写ARM裸机程序时，一些必要的芯片初始化也可以省略，因为GPU已经帮忙做了，外设寄存器地址从0x3F000000虚拟地址开始
   * 有关BCM2836 Boot的介绍详见本地文档[./raspi3-tutorial/README.md](./raspi3-tutorial/README.md) 的“About the hardware”小节。
   * BCM2836 ARM启动前的Boot程序下载地址：[Welcome to the Raspberry Pi Firmware Wiki](https://github.com/raspberrypi/firmware/wiki)
@@ -648,13 +650,18 @@ sctlr_el1: 30D00800  tcr_el1: 0
 
 #### 2、arch文件夹
 
-* 裸机源码目录和文件类型仿照Linux的风格来布置，参考的具体Linux版本为2022-11-07 07:07打tag的linux_6.1-rc4版本。
+1. 裸机源码目录和文件类型仿照Linux的风格来布置，参考的具体Linux版本为2022-11-07 07:07打tag的linux_6.1-rc4版本。
   * linux_6.1-rc4版本代码查看和下载路径：[Linux 6.1-rc4](https://gitee.com/mirrors/linux_old1/tree/v6.1-rc4)
 * arch文件夹里面存放和硬件相关的内容，能抽象出去的纯逻辑内容都会剥离出去。
 * 因为一个功能或者模块可能会被拆分为硬件相关和硬件无关的部分，所以其它文件夹里的.c/h文件，可能在arch文件夹内会有同名的文件存在。
 * 不像普通的单片机源码结构同名的.c源文件和.h头文件放在同一个文件夹内，这个裸机工程里源文件和头文件是放在不同的文件夹内的；头文件单独放在一起方便单独输出调用接口；这样在有需要时也方便对底层代码保密，用多了也就能对这种代码组织结构习惯了。
 * arch文件夹里面有汇编写的Boot代码，汇编先执行后再引导C语言的main()函数。
   * Cortex-A7汇编语言、关键字、伪指令和编码风格详见本仓库内的子文档：[《05_ARM Cortex-A7汇编语言和GNU伪指令介绍.md》](./doc/05_ARM Cortex-A7汇编语言和GNU伪指令介绍.md)
+* BCM2836外设地址可以参见Linux中设备树的源码：https://gitee.com/mirrors/linux_old1/blob/master/arch/arm/boot/dts/bcm2836-rpi-2-b.dts ，和https://gitee.com/mirrors/linux_old1/blob/master/arch/arm/boot/dts/bcm283x.dtsi
+* BCM2836的汇编boot可以参见Linux中arch/arm/boot/中的代码： https://gitee.com/mirrors/linux_old1/blob/master/arch/arm/boot/bootp/init.S
+* BCM2836的汇编boot也可以参见U-Boot中arch/arm/cpu/armv7/中的代码：https://gitee.com/mirrors/u-boot/blob/master/arch/arm/cpu/armv7/start.S
+
+2. BCM2836的寄存器地址头文件，通过在Ubuntu下下载Linux kernel源码，安装树莓派提供的ARM交叉编译工具，将BCM2835的默认配置改成BCM2836的，然后编译生成。
 
 #### 3、samples文件夹
 
@@ -662,3 +669,41 @@ sctlr_el1: 30D00800  tcr_el1: 0
 * 已实现的有汇编boot，串口输出，
 
 #### 4、
+
+## 八、RTOS编程
+
+## 九、Linux编程
+
+### 1）编译Linux kernel
+
+* 如果要编译用于BCM2836的Linux kernel，则必须要在Linux环境如Ubuntu中编译，因为kernel源码中有三个以aux命名的文件，这个文件名在Windows环境中不允许存在，在Windows中解压或者拷贝kernel源码时都会报错；如果一定要在Windows下的MinGW中编译，网上找不到任何教程，你可以在kernel源码中强行修改aux文件名和对应的Kconfig、Makefile后自行尝试。
+  * 不要在Windows下git clone kernel源码后再拷贝到Linux系统中编译，会丢失软连接，导致dt-bindings/pinctrl/xxx.h文件明明有，但是链接器提示找不到文件的报错，该问题很难解决。
+  * （当前不使用）树莓派官方提供了从Linux kernel中派生的源码，路径为https://github.com/raspberrypi/linux 。
+  * （使用）但是Linux kernel官方源码中也支持BCM2835/6/7，路径为https://gitee.com/mirrors/linux_old1 ；我当前使用Linux官方的源码，但是推荐使用树莓派自己的源码；整个仓库有好几G，如果用git clone的方式拉代码，中间时间比较久，一旦中间网络中断，则无法恢复，需要重新clone；如果不需要checkout到指定历史版本，则推荐直接下载zip压缩包，这样只有250M。
+
+* （不使用）树莓派官方提供了交叉编译工具：https://github.com/raspberrypi/tools ，下载解压后，BCM2836能用的交叉编译工具的目录在 ./arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/；注意：这只能编译U-Boot、Linux kernel和Linux应用，不能编译ARM裸机程序；也可以不用树莓派提供的，而自行去ARM官方或者Linaro官方交叉编译工具。
+  * 如果用Linux官方的kernel源码，则不能使用树莓派的交叉编译工具：
+    * Linux kernel源码的下载路径：https://gitee.com/mirrors/linux_old1/tree/v6.1-rc4
+    * 先在Linux系统环境中修改芯片类型和编译器名称：
+    * export ARCH=arm
+    * export CROSS_COMPILE=arm-linux-gnueabihf-
+    * 再 make bcm2835_defconfig
+    * 当前Linux kernel源码要求最低的gcc版本为Minimum GCC version: 5.1.0，而树莓派提供的版本为4.8.3，版本太低。
+  * （不使用）ARM官网的交叉编译工具，当前只支持64位主机下的软件：https://developer.arm.com/downloads/-/gnu-a
+    * 当前ARM gcc的版本是12.2.0，arm官网从从2016年的GCC6开始只提供64位Linux的交叉编译器可执行文件
+  * （不使用）Linaro gcc交叉编译器，最新的gcc版本是11.3，当前只支持64位主机下的下载地址：https://snapshots.linaro.org/gnu-toolchain/11.3-2022.06-1/arm-linux-gnueabihf/
+    * （使用）Linaro另一个旧版本的地址支持32位主机的工具下载：https://releases.linaro.org/components/toolchain/binaries ，这里面Linaro gcc的最新版本是7.5.0；因为我虚拟机中安装的是32位的Ubuntu 16.04系统，32位的系统可以省去在64位系统中安装32位编译所需环境的步骤，所以我使用[gcc-linaro-7.5.0-2019.12-i686_arm-linux-gnueabihf.tar.xz](https://releases.linaro.org/components/toolchain/binaries/7.5-2019.12/arm-linux-gnueabihf/gcc-linaro-7.5.0-2019.12-i686_arm-linux-gnueabihf.tar.xz)
+
+* 安装了Linux发行版系统，在里面下载了Linux kernel源码，安装了Linaro gcc7.5.0交叉编译器后
+  * make bcm2835_defconfig 生成.config，源码里 没有BCM2836的默认配置，只有2835的，先用这个，然后再在里面改。
+  * make menuconfig  打开kernel配置界面。
+  * 在kernel字符配置界面中：System type --> Platform selection 取消armv6的选择，只保留armv7；
+  * make uImage  因为之前已经配置了ARCH和CROSS_COMPILE变量（也可以只在kernel .config或者Makefile中指定这两个环境变量），直接make uImage，如果你不是虚拟机，可以make uImage -j8，8核并行编译，加快编译速度；编译时间比较久，可能要几分钟到几十分钟。
+  * 如果遇到编译报错，提示某些.h文件找不到，则一般是电脑上没安装对应的库；将报错信息百度，按照搜到的文章安装缺少的库，再重新编译即可。
+
+* 设备树在2011年3月在从Linux kernel源码3.1版本中正式替代寄存器头文件。
+  * .dtsi设备树文件中只有各个模块的起始寄存器地址，没有每个寄存器详细的描述，而每个模块的寄存器定义和偏移则在每个驱动的源文件中，不会有一个统一的.h头文件包含了所有的寄存器地址定义。
+  * 设备树添加之前的2.6.xx版本中，能在/arch/arm/plat-xxx和/arch/arm/mach-xxx中看到芯片的所有模块的寄存器基地址，和模块中所有寄存器的头文件宏定义。例如：https://gitee.com/mirrors/linux_old1/blob/v3.0/arch/arm/mach-bcmring/include/mach/csp/mm_addr.h ，https://gitee.com/mirrors/linux_old1/blob/v3.0/arch/arm/include/asm/hardware/dec21285.h 和 https://gitee.com/mirrors/linux_old1/blob/v3.0/arch/arm/mach-bcmring/include/mach/reg_umi.h 等。
+
+* *参考网址*
+   * [arm交叉编译器gnueabi、none-eabi、arm-eabi、gnueabihf、gnueabi区别](https://www.lmlphp.com/user/10684/article/item/449849/)
