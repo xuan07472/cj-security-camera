@@ -64,5 +64,5 @@ fiq_handler:		.word hang
 /*
  * \brief	死循环函数
  * \details	b是跳转指令
- *
+ */
 hang: b hang
