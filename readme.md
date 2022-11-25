@@ -1,16 +1,18 @@
-# 项目介绍：嵌入式开源项目-CJ安防摄像机
+# 项目介绍：嵌入式QEMU教程
 
 |作者|将狼才鲸|
 |---|---|
 |创建日期|2022-11-14|
 
-* Gitee源码和工程地址：[才鲸嵌入式 / 开源安防摄像机（嵌入式软件）](https://gitee.com/langcai1943/cj-security-camera)
-* CSDN文章地址：[项目介绍：开源安防摄像机（嵌入式软件）](https://blog.csdn.net/qq582880551/article/details/127857259)
+* Gitee源码和工程地址：[才鲸嵌入式 / 嵌入式QEMU教程](https://gitee.com/langcai1943/cj-security-camera)
+* CSDN文章地址：[项目介绍：嵌入式QEMU教程](https://blog.csdn.net/qq582880551/article/details/127857259)
 * *注：文章中的子文档链接需在Gitee中的readme.md仓库介绍中才能点开，我设置的是相对地址，也可以在Gitee仓库的doc文件夹下手动点开。*
 
 ---
 
-* 简介：使用ARM Cortex-A7 32位内核、带有GPU（2D 3D显示加速、图片和音频视频编解码）的博通BCM2836芯片（树莓派2B同款硬件，但不使用树莓派的系统和软件），初期在QEMU模拟器中运行，需要调用GPU时再在实际硬件上运行，实现安防摄像机、音视频播放器等嵌入式设备的功能。
+* 简介：硬件平台均为QEMU模拟器。
+1. 当前裸机项目使用ARM Cortex-A7 32位内核、带有GPU（2D 3D显示加速、图片和音频视频编解码）的博通BCM2836芯片（树莓派2B同款硬件，但不使用树莓派的系统和软件）。
+2. 当前Linux项目使用ARM Versatile Express开发板，从源码编译运行U-Boot、Linux和根文件系统。
 
 <center>表1 本仓库软硬件资源描述</center>
 
@@ -20,14 +22,14 @@
 |**硬件模块测试用例：raspi3-tutorial**|裸机程序，包含让CPU运行的空程序、串口打印、屏幕图像输出、屏幕文字输出、读写SD卡、bootloader|树莓派3B同款硬件BCM2837，在仓库根目录raspi3-tutorial文件夹中, 开箱即用, 直接make, 直接在QEMU中运行|
 |**裸机项目**|汇编boot，串口打印，......进行中......|树莓派2B同款硬件BCM2836|
 |**RTOS项目**|......未开始......||
-|**Linux项目**|......未开始......||
+|**Linux项目**|uboot编译运行，Linux和根文件系统编译运行|ARM CoreTile Express开发板|
 |**使用的开源库**|||
 
 ---
 
 ## 一、前言
 
-1. 作为一名嵌入式软件工程师，我想自己从头开始做一个实际的嵌入式产品；结合自己工作中接触过的技术，我决定做一个带有通信、GUI、音视频编码、音视频解码功能的设备，思来想去选定了安防摄像机领域。
+1. 作为一名嵌入式软件工程师，我想自己从头开始做一个实际的嵌入式产品；结合自己工作中接触过的技术，我希望最终的项目中有通信、GUI、音视频编码、音视频解码功能的设备。
 
 2. 创建这个仓库的目的，一是记录自己学习到的技术，防止时间久了忘记；二是给其他也想要做一个实际嵌入式项目的人一个参考，最好是能开箱即用，能看到产品的效果，然后能方便的阅读源码和注释，知晓原理，而不用自己去一步步搭建环境；搭环境是很痛苦的，往往遇到一个问题跨不过去，又没人指导，然后就不得不放弃了。
 
@@ -116,10 +118,10 @@
 
 ### 4）完整的环境安装步骤
 
-* 写在前面，我会提供已经安装好各种工具的MSYS2环境，如果你没用过Linux，建议你直接下载本系统压缩包cj_msys64.zip（该压缩包太大，有2G，暂未上传），解压后使用，或者自行使用VMware Player虚拟机+Ubuntu安装开发环境，因为MSYS2中安装软件的教程很难快速找到，需要有一些使用Linux的经验才知道怎么安装特定软件；我的MSYS2环境添加了32位和64位的交叉编译工具，他们的来源不一样，后面会详述。
-
-* 下面是从头到尾的工具软件安装步骤：
-  * 推荐使用MSYS2 + 已经用MinGW32或MinGW64编译好的程序，基本上开发过程中你能在Linux下实现的，也都能在这个环境下实现，只是有些教程没有Ubuntu下那么好找；在MSYS2中不能使用Linux的程序，必须用MinGW将源码重新编译过后才能使用，这一般是软件供应商已经做好的。
+* 写在前面，我会使用Windows下的MSYS2环境 + QEMU，和VMware Player16 + Ubuntu18.04 + QEMU。如果你没用过Linux，则建议使用VMware虚拟机 + Ubuntu的开发环境，因为MSYS2中安装软件的教程很难快速找到，需要有一些使用Linux的经验才知道怎么安装特定软件；我的MSYS2环境添加了32位和64位的交叉编译工具，他们的来源不一样，后面会详述。
+* MSYS2中的QEMU只能运行裸机程序、U-Boot和Linux kernel（加载根文件系统会失败），而Ubuntu下的QEMU才能运行U-Boot + kernel + rootfs。如果你除了裸机编程，还想学习Linux编程，则建议你跳过本章节（第四章）剩下的内容，直接跳转到本文档的“九、Linux编程”章节安装Linux的环境，然后再继续第五章。
+* 下面是Windows下从头到尾的工具软件安装步骤：
+  * 推荐使用MSYS2 + 已经用MinGW32或MinGW64编译好的程序，在Linux下常用的功能，也都能在这个环境下实现，只是有些教程没有Ubuntu下那么好找；在MSYS2中不能使用Linux的程序，必须用MinGW将源码重新编译过后才能使用，这一般是软件供应商已经编译好了，可以直接下载的。
   * MSYS2的更多信息详见本仓库**子文档**：[《04_MSYS2简述.md》](./doc/04_MSYS2简述.md)
 
 <center>表2 MSYS2、MinGW和Cygwin的关系</center>
@@ -171,7 +173,7 @@ Copyright (c) 2003-2022 Fabrice Bellard and the QEMU Project developers
   * （不用）GNU官方提供了树莓派在Windows中使用的交叉工具包，默认的工具是使用Visual Studio +  VisualGDB来进行编译的。  
   32位地址：[Prebuilt Windows Toolchain for Raspberry Pi](https://gnutoolchains.com/raspberry/)  
   64位地址：[Prebuilt Windows Toolchain for Raspberry Pi (64-bit)](https://gnutoolchains.com/raspberry64/)  
-  * （不用）ARM在Windows下自带的交叉编译工具为gcc-arm-none-eabi-10.3-2021.10-win32.exe，网页路径在https://developer.arm.com/downloads/-/gnu-rm ，交叉编译工具名为arm-none-eabi-gcc，我们不使用树莓派自带的交叉编译工具，而直接使用ARM的；因为树莓派没有直接给出MinGW下的交叉编译工具，而我也不想在Cygwin环境使用树莓派的Linux交叉编译工具。
+  * （不用）ARM在Windows下自带的交叉编译工具为arm-gnu-toolchain-11.3.rel1-mingw-w64-i686-arm-none-eabi.zip，网页路径在https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads ，交叉编译工具名为arm-none-eabi-gcc，这是不能用于Linux编程的，我们不使用树莓派自带的交叉编译工具，而直接使用ARM的；因为树莓派没有直接给出MinGW下的交叉编译工具。
 
 * 但也不在ARM官方下载，我们在MSYS2中同样也能找到：在https://packages.msys2.org/base 中能搜到mingw-w64-arm-none-eabi-gcc和mingw-w64-arm-none-eabi-gdb
   * MSYS2下载命令 pacman -S mingw-w64-x86_64-arm-none-eabi-gcc，大小有1.24 GB，参考网址：[Package: mingw-w64-x86_64-arm-none-eabi-gcc](https://packages.msys2.org/package/mingw-w64-x86_64-arm-none-eabi-gcc?repo=mingw64)
@@ -674,14 +676,115 @@ sctlr_el1: 30D00800  tcr_el1: 0
 
 ## 九、Linux编程
 
-### 1）编译Linux kernel
+* 前提：编译U-Boot和Linux kernel源码时，源码版本、PC主机Linux系统版本、交叉编译器版本都有影响，最好按照网上教程中相同的版本来尝试，要不然经常会遇到编译时遇到了问题，但又搜不到解决方法的尴尬局面。
 
-* 如果要编译用于BCM2836的Linux kernel，则必须要在Linux环境如Ubuntu中编译，因为kernel源码中有三个以aux命名的文件，这个文件名在Windows环境中不允许存在，在Windows中解压或者拷贝kernel源码时都会报错；如果一定要在Windows下的MinGW中编译，网上找不到任何教程，你可以在kernel源码中强行修改aux文件名和对应的Kconfig、Makefile后自行尝试。
+* 必须在Linux系统中编译（如Ubuntu），不能在MSYS2中编译。
+
+### 1）直接编译Linux源码并运行
+
+#### 1、编译U-Boot并在QEMU中运行
+
+* 网上能搜到的QEMU + U-Boot已有的示例都是使用的ARM官方的开发板配置：如vexpress_ca9x4_defconfig、qemu_arm_vexpress_defconfig、versatile_defconfig，第一阶段我也使用相同的配置，后续我会在树莓派2b的硬件上尝试。
+* 编译好的u-boot文件放在本仓库根目录/linux/文件夹下，可以直接运行查看效果
+
+* 当前硬件为ARM Versatile™ Express开发板系列的CoreTile Express主板。
+  * 开发板资料：[express_ca9x4 uboot分析](https://www.cnblogs.com/wjx321/p/7226410.html)
+
+* 我使用最新版本的U-Boot官方源码，系统使用的是VMware Player Ubuntu18.04。当前下载的U-Boot版本是v2023.01-rc2，地址：[Gitee 极速下载 / u-boot Prepare v2023.01-rc2](https://gitee.com/mirrors/u-boot/repository/archive/v2023.01-rc2)，文件有33M，要查看所有版本的话则进入https://gitee.com/mirrors/u-boot/tags
+  * 当前VM Player最新的版本是17，https://customerconnect.vmware.com/en/downloads/info/slug/desktop_end_user_computing/vmware_workstation_player/17_0 ，但我因为之前已经安装了16，所以就用这个。没用过VM的建议先用VMware Workstation的破解版，网上的教程更多，但是Player和VM的使用方法是一样的，如果遇到了问题可以直接按VM搜到的解决办法来处理。
+  * 我在32位Ubuntu16.04上编译最新的U-Boot有报错，中文和外文网站搜索都未解决问题，见于16.04的版本官方也早已不支持了，现在重装为64位的Ubuntu18.04
+  * Ubuntu下载请找国内源下载，16.04是最后一个提供32位系统的版本，不用配置32位的依赖库。
+
+* *参考网址*
+  * [qemu启动uboot](https://blog.csdn.net/jqh_111/article/details/83720406)
+  * [QEMU 实验(二): 通过 u-boot 启动 kernel](https://www.jianshu.com/p/f7d5b6ad0710)
+  * [QEMU模拟arm u-boot/linux【转】 ](https://www.cnblogs.com/sky-heaven/p/16305974.html)
+  * [Linux内核实战应用：编译uboot并灵活使用qemu](https://zhuanlan.zhihu.com/p/547338158)
+
+---
+
+* 如果使用虚拟机，则下载安装VMware Player，过程略。
+* 下载并安装64位Ubuntu 18.04，因为我的笔记本电脑是2012年买的，配置不行，所以我在虚拟机中用老系统能跑的比较快；Ubuntu 18.04系统会持续支持到2028年，不用担心里面的软件过时。
+  1. 不要从Ubuntu官方下载，从各种大学的镜像中下载，速度会更快，我下载的地址是 [ubuntu-18.04.6-desktop-amd64.iso](http://mirrors.ustc.edu.cn/ubuntu-releases/18.04/ubuntu-18.04.6-desktop-amd64.iso)，如果要下载其它的版本，如Ubuntu 22.04，则进入http://mirrors.ustc.edu.cn/ubuntu-releases/ 对应的文件夹中，下载.iso文件；不管是Intel芯片还是AMD芯片，iso的文件尾都是amd64.iso，都可以用。
+  2. 虚拟机中安装Ubuntu18.04的过程略；为了在命令行中进入桌面方便，我选择先安装英文系统，然后再安装中文输入法；安装要花几十分钟，安装的过程中要不联网，否则安装的过程中会更新程序，速度非常慢。
+  * [VMware安装ubuntu18.04](https://blog.csdn.net/weixin_43928755/article/details/125780576)
+  3. 如果你用的笔记本，Ubuntu18虚拟机中使用不了触摸板的手势功能，不能双指滚动，忍耐一下。
+  4. Ubuntu18.04选了中文之后，默认的软件源为国内源，但还是需要指定为具体的哪个源，例如指定阿里云的源；更换国内源后更新一下系统。
+    * [Ubuntu更换国内源（apt更换源）](https://blog.csdn.net/u012206617/article/details/122321849)
+  5. 不要按屏幕下方VMware的提示使用CD的方式安装安装VMware Tools，而要在Ubuntu中用命令行直接安装；这样才能全屏和与Windows拖动文件；安装过程略。
+    * [VMware 16安装的Ubuntu18.04 系统，无法在Windows和Ubuntu之间直接自由拖拽复制文件](https://blog.csdn.net/m0_56208280/article/details/127178181)
+  6. 如果安装系统时选择的是英语，则安装中文输入法。
+    * [Ubuntu 18.04 配置ibus中文拼音输入法（超简单）](https://blog.csdn.net/wu10188/article/details/86540464)
+    * [如何在ubuntu18.04中设置使用中文输入法](https://blog.csdn.net/weixin_51483516/article/details/122463145)
+    * [Ubuntu18.04 上如何使用中文输入法？](https://blog.csdn.net/qq_38429958/article/details/122573335)
+    * 取消窗口合并：[ubuntu gnome下, alt + tab切换窗口时,不要把同组的窗口合并的配置方法+解决ubuntu无法使用root用户启动Google Chrome浏览器](https://blog.csdn.net/qq_25905159/article/details/103186502)
+
+* *参考网址：*
+* [Ubuntu 国内镜像下载地址大全](https://blog.csdn.net/qq_45066628/article/details/121826280)
+* [转载：ubuntu各个版本的发行时间和停止支持的时间，更新到最新版和代号。](https://blog.csdn.net/aw77520/article/details/112601600)
+
+---
+
+* 从ARM官网下载最新的，在64位PC上使用的32位ARM交叉编译工具，下载速度比较慢。
+  1. （未使用）下载地址：[arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-linux-gnueabihf.tar.xz]https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-linux-gnueabihf.tar.xz)
+    * 这是最新版本的查看地址：https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
+    * （使用）！注意！后面编译BusyBox时我发现最新版的ARM交叉编译器会报错，新版本编译器编译kernel和U-Boot都没问题。我又装回了这个老版本，10.2版本编译器ARM官方下载地址：[gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf.tar.xz](https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf.tar.xz)
+  2. （未使用）或者从Linaro上下载当前最新的稳定版本，下载地址：[gcc-linaro-12.2.1-2022.11-x86_64_arm-linux-gnueabihf.tar.xz](https://snapshots.linaro.org/gnu-toolchain/12.2-2022.11-1/arm-linux-gnueabihf/gcc-linaro-12.2.1-2022.11-x86_64_arm-linux-gnueabihf.tar.xz)
+    * Linaro的下载速度也很慢；暂时没找到国内提供的下载镜像。
+
+* 解压交叉编译器，然后在Linux系统中输出芯片架构和交叉编译工具名称的环境变量和交叉编译工具的路径
+
+```shell
+# 因为我当前不编译Linux PC下的程序，所以我直接将整个环境都配成交叉编译的
+export ARCH=arm
+export CROSS_COMPILE=arm-none-linux-gnueabihf-
+# 增加交叉编译器的路径，修改成你自己解压的路径
+export PATH=$PATH:/home/jim/Desktop/tools/arm-gnu-toolchain-11.3/bin
+```
+
+* 编译uboot时报错发现未安装而需要安装的软件：
+  * sudo apt-get install make
+  * sudo apt-get install gcc
+  * sudo apt-get install bison
+  * sudo apt-get install flex
+  * sudo apt-get install libssl-dev
+  * 如果lib/display_options.c:59:9: 编译器内部错误： 非法指令报错时将该行改成：  
+     unsigned long d = 1000000000;//1e9;  
+* 编译完成后会在uboot源码目录下生成u-boot文件，将其用QEMU运行即可。
+* 编译好的u-boot文件我已经放在另一个仓库中，地址为：https://gitee.com/langcai1943/linux_kernel_u-boot_busybox_code_comments/bin/v1.0.0
+
+```shell
+jim@DESKTOP-SVP3BEM MSYS /d
+$ qemu-system-arm -M vexpress-a9 -m 256 -kernel u-boot --nographic
+
+
+U-Boot 2023.01-rc2 (Nov 25 2022 - 17:27:26 +0800)
+
+DRAM:  256 MiB
+WARNING: Caches not enabled
+Core:  18 devices, 10 uclasses, devicetree: embed
+Flash: 64 MiB
+MMC:   mmci@5000: 0
+Loading Environment from Flash... *** Warning - bad CRC, us
+ing default environment
+......
+```
+
+#### 2、编译Linux kernel
+
+* 如果要编译用于BCM2836或ARM CoreTile Express开发板的Linux kernel，则必须要在Linux环境如Ubuntu中编译。一是因为编译过程中有各种依赖库；二是因为kernel源码中有三个以aux命名的文件，这个文件名在Windows环境中不允许存在，在Windows中解压或者拷贝kernel源码时都会报错；如果一定要在Windows下的MinGW中编译，网上找不到任何教程，你可以在kernel源码中强行修改aux文件名和对应的Kconfig、Makefile后，并安装各种依赖库，只能自行尝试；在MSYS2中安装各种依赖库软件也是需要自行摸索的，应该很少有教程。
   * 不要在Windows下git clone kernel源码后再拷贝到Linux系统中编译，会丢失软连接，导致dt-bindings/pinctrl/xxx.h文件明明有，但是链接器提示找不到文件的报错，该问题很难解决。
-  * （当前不使用）树莓派官方提供了从Linux kernel中派生的源码，路径为https://github.com/raspberrypi/linux 。
-  * （使用）但是Linux kernel官方源码中也支持BCM2835/6/7，路径为https://gitee.com/mirrors/linux_old1 ；我当前使用Linux官方的源码，但是推荐使用树莓派自己的源码；整个仓库有好几G，如果用git clone的方式拉代码，中间时间比较久，一旦中间网络中断，则无法恢复，需要重新clone；如果不需要checkout到指定历史版本，则推荐直接下载zip压缩包，这样只有250M。
+  * （使用）Linux kernel官方源码中也支持BCM2835/6/7和ARM CoreTile Express，源码查看路径为https://gitee.com/mirrors/linux_old1 ；我当前使用Linux官方最新的源码，下载路径为[v6.1-rc6](https://gitee.com/mirrors/linux_old1/repository/archive/v6.1-rc6)。整个仓库带所有Git历史的源码有好几G，如果用git clone的方式拉代码，中间时间比较久，一旦中间网络中断，则无法恢复，需要重新clone；推荐直接下载zip压缩包，这样只有250M。
+  * （当前不使用）树莓派官方提供了从Linux kernel中派生的源码，但是版本比kernel官方低很多，路径为https://github.com/raspberrypi/linux 。
 
-* （不使用）树莓派官方提供了交叉编译工具：https://github.com/raspberrypi/tools ，下载解压后，BCM2836能用的交叉编译工具的目录在 ./arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/；注意：这只能编译U-Boot、Linux kernel和Linux应用，不能编译ARM裸机程序；也可以不用树莓派提供的，而自行去ARM官方或者Linaro官方交叉编译工具。
+* Ubuntu主机和交叉编译工具可以直接用上面U-Boot同样的环境，下面介绍的是32位Ubuntu16.04下使用的交叉编译工具；Linux kernel在此环境下也能编译通过。
+
+---
+
+  * 这是在32位Ubuntu16.04下编译kernel的步骤，可以不看，后面有64位Ubuntu18.04中编译的介绍。
+  * 因为我虚拟机中的64位Ubuntu18.04系统运行起来很慢，所以我最终都会在Ubuntu16.04中编译内核。
+  * （使用）Linaro旧版本的地址支持32位主机的工具下载：https://releases.linaro.org/components/toolchain/binaries ，这里面Linaro gcc的最新版本是7.5.0；因为我虚拟机中安装的是32位的Ubuntu 16.04系统，32位的系统可以省去在64位系统中安装32位编译所需环境的步骤，所以我使用[gcc-linaro-7.5.0-2019.12-i686_arm-linux-gnueabihf.tar.xz](https://releases.linaro.org/components/toolchain/binaries/7.5-2019.12/arm-linux-gnueabihf/gcc-linaro-7.5.0-2019.12-i686_arm-linux-gnueabihf.tar.xz)
+  * （不使用）树莓派官方也提供了交叉编译工具：https://github.com/raspberrypi/tools ，但是比ARM官方或者Linaro官方的编译器版本要低。下载解压后，BCM2836能用的交叉编译工具的目录在 ./arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/；注意：这只能编译U-Boot、Linux kernel和Linux应用，不能编译ARM裸机程序；但是该编译器编译最新的Linux kernel源码会报错。
   * 如果用Linux官方的kernel源码，则不能使用树莓派的交叉编译工具：
     * Linux kernel源码的下载路径：https://gitee.com/mirrors/linux_old1/tree/v6.1-rc4
     * 先在Linux系统环境中修改芯片类型和编译器名称：
@@ -689,21 +792,225 @@ sctlr_el1: 30D00800  tcr_el1: 0
     * export CROSS_COMPILE=arm-linux-gnueabihf-
     * 再 make bcm2835_defconfig
     * 当前Linux kernel源码要求最低的gcc版本为Minimum GCC version: 5.1.0，而树莓派提供的版本为4.8.3，版本太低。
-  * （不使用）ARM官网的交叉编译工具，当前只支持64位主机下的软件：https://developer.arm.com/downloads/-/gnu-a
+  * （不使用）ARM官网的交叉编译工具，当前只支持64位主机下的软件：https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
     * 当前ARM gcc的版本是12.2.0，arm官网从从2016年的GCC6开始只提供64位Linux的交叉编译器可执行文件
   * （不使用）Linaro gcc交叉编译器，最新的gcc版本是11.3，当前只支持64位主机下的下载地址：https://snapshots.linaro.org/gnu-toolchain/11.3-2022.06-1/arm-linux-gnueabihf/
-    * （使用）Linaro另一个旧版本的地址支持32位主机的工具下载：https://releases.linaro.org/components/toolchain/binaries ，这里面Linaro gcc的最新版本是7.5.0；因为我虚拟机中安装的是32位的Ubuntu 16.04系统，32位的系统可以省去在64位系统中安装32位编译所需环境的步骤，所以我使用[gcc-linaro-7.5.0-2019.12-i686_arm-linux-gnueabihf.tar.xz](https://releases.linaro.org/components/toolchain/binaries/7.5-2019.12/arm-linux-gnueabihf/gcc-linaro-7.5.0-2019.12-i686_arm-linux-gnueabihf.tar.xz)
-
-* 安装了Linux发行版系统，在里面下载了Linux kernel源码，安装了Linaro gcc7.5.0交叉编译器后
+* 安装了Ubuntu 16.04 32位系统，在里面下载了Linux kernel源码，安装了Linaro gcc7.5.0交叉编译器后
   * make bcm2835_defconfig 生成.config，源码里 没有BCM2836的默认配置，只有2835的，先用这个，然后再在里面改。
   * make menuconfig  打开kernel配置界面。
   * 在kernel字符配置界面中：System type --> Platform selection 取消armv6的选择，只保留armv7；
-  * make uImage  因为之前已经配置了ARCH和CROSS_COMPILE变量（也可以只在kernel .config或者Makefile中指定这两个环境变量），直接make uImage，如果你不是虚拟机，可以make uImage -j8，8核并行编译，加快编译速度；编译时间比较久，可能要几分钟到几十分钟。
+  * make 因为之前已经配置了ARCH和CROSS_COMPILE变量（也可以只在kernel .config或者Makefile中指定这两个环境变量），直接make ，如果你不是虚拟机，可以make -j8，8核并行编译，加快编译速度；编译时间比较久，可能要几分钟到几十分钟；要生成uImage的话要指定地址，例如make uImage LOADADDR=0x8000，生成的uImage在arch/arm/boot/中。
   * 如果遇到编译报错，提示某些.h文件找不到，则一般是电脑上没安装对应的库；将报错信息百度，按照搜到的文章安装缺少的库，再重新编译即可。
-
 * 设备树在2011年3月在从Linux kernel源码3.1版本中正式替代寄存器头文件。
   * .dtsi设备树文件中只有各个模块的起始寄存器地址，没有每个寄存器详细的描述，而每个模块的寄存器定义和偏移则在每个驱动的源文件中，不会有一个统一的.h头文件包含了所有的寄存器地址定义。
   * 设备树添加之前的2.6.xx版本中，能在/arch/arm/plat-xxx和/arch/arm/mach-xxx中看到芯片的所有模块的寄存器基地址，和模块中所有寄存器的头文件宏定义。例如：https://gitee.com/mirrors/linux_old1/blob/v3.0/arch/arm/mach-bcmring/include/mach/csp/mm_addr.h ，https://gitee.com/mirrors/linux_old1/blob/v3.0/arch/arm/include/asm/hardware/dec21285.h 和 https://gitee.com/mirrors/linux_old1/blob/v3.0/arch/arm/mach-bcmring/include/mach/reg_umi.h 等。
 
+---
+
+* 下面是在64位Ubuntu 18.04中编译Linux kernel的步骤
+* 编译好的zImage和vexpress-v2p-ca9.dtb文件放在本仓库根目录/linux/文件夹下，可以直接运行查看效果
+* 交叉编译环境保持和上面编译U-Boot时相同
+* 下载最新的Linux kernel源码：[v6.1-rc4](https://gitee.com/mirrors/linux_old1/repository/archive/v6.1-rc6)
+
+* 编译：
+  * make vexpress_defconfig
+  * make zImage dtbs -j4
+* 安装过程中遇到了报错，需要安装依赖库：
+  * sudo apt-get install g++
+  * sudo apt-get install libmpc-dev
+  * 将arch/arm/boot/zImage和arch/arm/boot/dts/vexpress-v2p-ca9.dtb拷贝出来
+
+* 运行：
+  * qemu-system-arm -M vexpress-a9 -m 256M -nographic -kernel zImage -dtb vexpress-v2p-ca9.dtb
+  * 能正常运行，但是会提示没有文件系统
+  * 编译好的zImage和vexpress-v2p-ca9.dtb文件我已经放在另一个仓库中，地址为：https://gitee.com/langcai1943/linux_kernel_u-boot_busybox_code_comments/bin/v1.0.0
+* 运行效果：
+```shell
+jim@DESKTOP-SVP3BEM MSYS /d/1_git/cj-security-camera/linux
+$ qemu-system-arm -M vexpress-a9 -m 256M -nographic -kernel zImage -dtb vexpress-v2p-ca9.dtb
+Booting Linux on physical CPU 0x0
+Linux version 6.1.0-rc6 (jim@jim) (arm-none-linux-gnueabihf-gcc (Arm GNU Toolchain 11.3.Rel1) 11.3.1
+ 20220712, GNU ld (Arm GNU Toolchain 11.3.Rel1) 2.38.20220708) #1 SMP Fri Nov 25 23:17:29 CST 2022
+CPU: ARMv7 Processor [410fc090] revision 0 (ARMv7), cr=10c5387d
+CPU: PIPT / VIPT nonaliasing data cache, VIPT nonaliasing instruction cache
+OF: fdt: Machine model: V2P-CA9
+Memory policy: Data cache writeback
+Reserved memory: created DMA memory pool at 0x4c000000, size 8 MiB
+OF: reserved mem: initialized node vram@4c000000, compatible id shared-dma-pool
+cma: Reserved 16 MiB at 0x6f000000
+Zone ranges:
+  Normal   [mem 0x0000000060000000-0x000000006fffffff]
+Movable zone start for each node
+Early memory node ranges
+  node   0: [mem 0x0000000060000000-0x000000006fffffff]
+Initmem setup node 0 [mem 0x0000000060000000-0x000000006fffffff]
+CPU: All CPU(s) started in SVC mode.
+......
+---[ end Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(0,0) ]---
+```
+
 * *参考网址*
-   * [arm交叉编译器gnueabi、none-eabi、arm-eabi、gnueabihf、gnueabi区别](https://www.lmlphp.com/user/10684/article/item/449849/)
+  * [QEMU 实验(一): u-boot 和 kernel 编译](https://www.jianshu.com/p/bf96ff253f0f)
+  * [QEMU搭建Kernel模拟调试开发环境](https://blog.csdn.net/RIPNDIP/article/details/104966711)
+  * [arm交叉编译器gnueabi、none-eabi、arm-eabi、gnueabihf、gnueabi区别](https://www.lmlphp.com/user/10684/article/item/449849/)
+  * [在家学习嵌入式2--在qemu环境下使用uboot启动linux](https://wowothink.com/1b0d21a9/)
+  * [【qemu】qemu运行linux内核总结](https://blog.csdn.net/iriczhao/article/details/123752209)
+  * [QEMU体验最新Ｌinux-5.9.２内核](https://zhuanlan.zhihu.com/p/506867139)
+  * [QEMU调试Linux内核环境搭建](https://blog.csdn.net/qq_33095733/article/details/123631561)
+  * [qemu 搭建 ARM Linux环境](https://blog.csdn.net/m0_56548489/article/details/124720860)
+
+---
+
+#### 2、Busybox生成文件系统需要的系统应用程序和制作根文件系统
+
+* MSYS2中的QEMU不能引导文件系统（未尝试去查找解决该问题），在Linux下运行QEMU能正常引导。
+  * 在Ubuntu下安装QEMU：sudo apt install qemu-system-arm
+
+* 从官网下载最新的BusyBox发布版本：[busybox-1.35.0.tar.bz2 ](https://busybox.net/downloads/busybox-1.35.0.tar.bz2)
+  * 如果想要尝试最新的未形成版本的源码，则下载 [busybox-snapshot.tar.bz2](https://busybox.net/downloads/busybox-snapshot.tar.bz2)
+
+* 因为BusyBox源码更新较慢，ARM最新的编译器11.3编译BusyBox报错无法解决，所以我改用老版本的编译器，能编译通过
+* 10.2版本编译器ARM官方下载地址：[gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf.tar.xz](https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf.tar.xz)
+  * 解压后需要重新输出编译器路径：
+
+```shell
+export PATH=$PATH:/home/jim/Desktop/tools/gcc-arm-10.2/bin ，并重新注销或者重启Ubuntu
+```
+
+* 编译：
+  * make menuconfig
+  * 设置 Build Options 开启静态编译(提示: 可使用 / 搜索 `static`)
+    * 在第一行Settings  --->上回车，在滚动到中间位置，找到  [ ] Build static binary (no shared libs)并按空格，让括号内多一个星号表示选中，再按两次Esc，在弹出框中按回车保存配置  
+  * make -j4
+  * make install
+* 编译过程中报错时需要安装的依赖库
+  * sudo apt install libncurses5-dev
+
+---
+
+* 以下内容无效。以下为尝试解决最新的ARM GCC编译器编译时的问题，但最终失败，但保留重新编译安装coreutils工具集的步骤：
+
+* 遇到报错无法解决：
+
+```shell
+coreutils/dd.c: 在函数‘dd_output_status’中:
+coreutils/dd.c:123:21: 编译器内部错误： 非法指令
+  123 | #define G (*(struct globals*)bb_common_bufsiz1)
+      |                     ^~~~~~~
+coreutils/dd.c:192:29: 附注： in expansion of macro ‘G’
+  192 |         seconds = (now_us - G.begin_time_us) / 1000000.0;
+      |                             ^
+free(): invalid next size (fast)
+editors/awk.c: 在函数‘next_token’中:
+editors/awk.c:1121:17: 编译器内部错误： 已放弃
+ 1121 |                 debug_printf_parse("%s: using concat-inserted token\n", __func__);
+      |                 ^~~~~~~~~~~~~~~~~~
+```
+
+* 重新编译安装coreutils也无法解决报错的问题：
+  * sudo apt install git
+  * git clone git://git.sv.gnu.org/coreutils
+    * 编译步骤参考：[coreutils.git/plain/README](https://git.savannah.gnu.org/cgit/coreutils.git/plain/README-hacking)
+  * 注释掉
+
+```shell
+export ARCH=arm
+export CROSS_COMPILE=arm-none-linux-gnueabihf-
+export PATH=$PATH:/home/jim/Desktop/tools/arm-gnu-toolchain-11.3/bin
+```
+
+  * 然后登出系统（注销），再重新登入（或者重启也可以），去掉当前环境中的交叉编译环境变量
+  * 进入coreutils目录
+  * ./bootstrap  运行要一会儿，且没有打印提示，可以通过看自己CPU占用率来判断是否结束
+  * 执行时报错，则：
+    * sudo apt-get install autoconf
+    * sudo apt-get install autopoint
+    * sudo apt-get install gperf
+    * sudo apt-get install texinfo
+  * ./configure
+  * make CFLAGS='-w' -j4
+  * sudo make install
+* 重新编译Busybox仍然报错。
+* 以上内容无效。
+
+---
+
+```
+已在BusyBox源码文件夹下生成了_install目录，里面有板子上能用到的各种系统命令
+
+制作根文件系统：
+mkdir my_mnt
+dd if=/dev/zero of=rootfs.img bs=1024 count=16384  # 创建 16MB 虚拟磁盘
+mkfs.ext2 rootfs.img                               # 格式化成 ext2 格式文件系统
+sudo mount -o loop rootfs.img my_mnt               # 将镜像文件和块设备关联并挂载设备到my_mnt
+sudo cp -r _install/* my_mnt                       # 将 BUsybox 所有生成的程序拷贝到根目录
+
+# 创建4个tty设备（c代表字符设备，4是主设备号，1~4分别是次设备号）
+sudo mkdir -p my_mnt/dev
+sudo mknod my_mnt/dev/tty1 c 4 1
+sudo mknod my_mnt/dev/tty2 c 4 2
+sudo mknod my_mnt/dev/tty3 c 4 3
+sudo mknod my_mnt/dev/tty4 c 4 4
+
+# 创建终端
+sudo mknod -m 666 my_mnt/console c 5 1
+sudo umount my_mnt                                        
+```
+
+* 将生成的rootfs.img拷贝Ubuntu桌面
+* 将之前的u-boot和vexpress-v2p-ca9.dtb拷贝到Ubuntu桌面
+* 编译好的rootfs.img、zImage和vexpress-v2p-ca9.dtb文件我已经放在另一个仓库中，地址为：https://gitee.com/langcai1943/linux_kernel_u-boot_busybox_code_comments/bin/v1.0.0
+* 在Ubuntu桌面上打开终端
+* 在Ubuntu终端中执行 qemu-system-arm -M vexpress-a9 -m 256M -nographic -kernel zImage -dtb vexpress-v2p-ca9.dtb -sd rootfs.img -append "root=/dev/mmcblk0 rw console=ttyAMA0" 
+* 可以看到效果：
+
+```shell
+jim@jim:~/Desktop/usr$ qemu-system-arm -M vexpress-a9 -m 256M -nographic -kernel zImage -dtb vexpress-v2p-ca9.dtb -sd rootfs.img -append "root=/dev/mmcblk0 rw console=ttyAMA0" 
+WARNING: Image format was not specified for 'rootfs.img' and probing guessed raw.
+         Automatically detecting the format is dangerous for raw images, write operations on block 0 will be restricted.
+         Specify the 'raw' format explicitly to remove the restrictions.
+pulseaudio: set_sink_input_volume() failed
+pulseaudio: Reason: Invalid argument
+pulseaudio: set_sink_input_mute() failed
+pulseaudio: Reason: Invalid argument
+Booting Linux on physical CPU 0x0
+Linux version 6.1.0-rc6 (jim@jim) (arm-none-linux-gnueabihf-gcc (Arm GNU Toolchain 11.3.Rel1) 11.3.1 20220712, GNU ld (Arm GNU Toolchain 11.3.Rel1) 2.38.20220708) #1 SMP Fri Nov 25 23:17:29 CST 2022
+CPU: ARMv7 Processor [410fc090] revision 0 (ARMv7), cr=10c5387d
+CPU: PIPT / VIPT nonaliasing data cache, VIPT nonaliasing instruction cache
+OF: fdt: Machine model: V2P-CA9
+Memory policy: Data cache writeback
+Reserved memory: created DMA memory pool at 0x4c000000, size 8 MiB
+OF: reserved mem: initialized node vram@4c000000, compatible id shared-dma-pool
+cma: Reserved 16 MiB at 0x6f000000
+Zone ranges:
+  Normal   [mem 0x0000000060000000-0x000000006fffffff]
+Movable zone start for each node
+Early memory node ranges
+  node   0: [mem 0x0000000060000000-0x000000006fffffff]
+Initmem setup node 0 [mem 0x0000000060000000-0x000000006fffffff]
+CPU: All CPU(s) started in SVC mode.
+percpu: Embedded 15 pages/cpu s30612 r8192 d22636 u61440
+Built 1 zonelists, mobility grouping on.  Total pages: 65024
+Kernel command line: root=/dev/mmcblk0 rw console=ttyAMA0
+printk: log_buf_len individual max cpu contribution: 4096 bytes
+printk: log_buf_len total cpu_extra contributions: 12288 bytes
+printk: log_buf_len min size: 16384 bytes
+printk: log_buf_len: 32768 bytes
+printk: early log buf free: 14944(91%)
+......
+can't run '/etc/init.d/rcS': No such file or directory
+
+Please press Enter to activate this console. 
+/ # ls
+bin         dev         linuxrc     lost+found  sbin        usr
+/ # 
+```
+
+* *参考网址*
+  * [QEMU 实验(一): u-boot 和 kernel 编译](https://www.jianshu.com/p/bf96ff253f0f)
+  * [linux系统移植(qemu)+文件系统制作(busybox)+nfs](https://blog.csdn.net/m0_60292931/article/details/124512334)
+  * [根文件系统及Busybox详解之一](https://blog.csdn.net/chenlong12580/article/details/8761108)
+
+### 2）修改Linux源码并适配树莓派2b
+
+* 因为代码太大，我使用的U-Boot、Linux kernel和BusyBox源码在我的另一个仓库：[才鲸嵌入式 / Linux内核_U-Boot_BusyBox代码中文注释](https://gitee.com/langcai1943/linux_kernel_u-boot_busybox_code_comments)
