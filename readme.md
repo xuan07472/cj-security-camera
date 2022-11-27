@@ -685,7 +685,7 @@ sctlr_el1: 30D00800  tcr_el1: 0
 #### 1、编译U-Boot并在QEMU中运行
 
 * 网上能搜到的QEMU + U-Boot已有的示例都是使用的ARM官方的开发板配置：如vexpress_ca9x4_defconfig、qemu_arm_vexpress_defconfig、versatile_defconfig，第一阶段我也使用相同的配置，后续我会在树莓派2b的硬件上尝试。
-* 编译好的u-boot文件放在本仓库根目录/linux/文件夹下，可以直接运行查看效果
+* 编译好的u-boot文件我已经放在另一个仓库中，地址为：[https://gitee.com/langcai1943/linux_kernel_u-boot_busybox_code_comments/tree/develop/bin/v1.0.0](https://gitee.com/langcai1943/linux_kernel_u-boot_busybox_code_comments/tree/develop/bin/v1.0.0)
 
 * 当前硬件为ARM Versatile™ Express开发板系列的CoreTile Express主板。
   * 开发板资料：[express_ca9x4 uboot分析](https://www.cnblogs.com/wjx321/p/7226410.html)
@@ -726,7 +726,7 @@ sctlr_el1: 30D00800  tcr_el1: 0
 ---
 
 * 从ARM官网下载最新的，在64位PC上使用的32位ARM交叉编译工具，下载速度比较慢。
-  1. （未使用）下载地址：[arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-linux-gnueabihf.tar.xz]https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-linux-gnueabihf.tar.xz)
+  1. （未使用）下载地址：[arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-linux-gnueabihf.tar.xz]（https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-linux-gnueabihf.tar.xz)
     * 这是最新版本的查看地址：https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
     * （使用）！注意！后面编译BusyBox时我发现最新版的ARM交叉编译器会报错，新版本编译器编译kernel和U-Boot都没问题。我又装回了这个老版本，10.2版本编译器ARM官方下载地址：[gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf.tar.xz](https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf.tar.xz)
   2. （未使用）或者从Linaro上下载当前最新的稳定版本，下载地址：[gcc-linaro-12.2.1-2022.11-x86_64_arm-linux-gnueabihf.tar.xz](https://snapshots.linaro.org/gnu-toolchain/12.2-2022.11-1/arm-linux-gnueabihf/gcc-linaro-12.2.1-2022.11-x86_64_arm-linux-gnueabihf.tar.xz)
@@ -742,7 +742,10 @@ export CROSS_COMPILE=arm-none-linux-gnueabihf-
 export PATH=$PATH:/home/jim/Desktop/tools/arm-gnu-toolchain-11.3/bin
 ```
 
-* 编译uboot时报错发现未安装而需要安装的软件：
+* 编译U-Boot：
+  * make vexpress_ca9x4_defconfig
+  * make -j4
+* 编译U-Boot时报错发现未安装而需要安装的软件：
   * sudo apt-get install make
   * sudo apt-get install gcc
   * sudo apt-get install bison
@@ -751,7 +754,7 @@ export PATH=$PATH:/home/jim/Desktop/tools/arm-gnu-toolchain-11.3/bin
   * 如果lib/display_options.c:59:9: 编译器内部错误： 非法指令报错时将该行改成：  
      unsigned long d = 1000000000;//1e9;  
 * 编译完成后会在uboot源码目录下生成u-boot文件，将其用QEMU运行即可。
-* 编译好的u-boot文件我已经放在另一个仓库中，地址为：https://gitee.com/langcai1943/linux_kernel_u-boot_busybox_code_comments/bin/v1.0.0
+* 编译好的u-boot文件我已经放在另一个仓库中，地址为：[https://gitee.com/langcai1943/linux_kernel_u-boot_busybox_code_comments/tree/develop/bin/v1.0.0](https://gitee.com/langcai1943/linux_kernel_u-boot_busybox_code_comments/tree/develop/bin/v1.0.0)
 
 ```shell
 jim@DESKTOP-SVP3BEM MSYS /d
@@ -776,6 +779,7 @@ ing default environment
   * 不要在Windows下git clone kernel源码后再拷贝到Linux系统中编译，会丢失软连接，导致dt-bindings/pinctrl/xxx.h文件明明有，但是链接器提示找不到文件的报错，该问题很难解决。
   * （使用）Linux kernel官方源码中也支持BCM2835/6/7和ARM CoreTile Express，源码查看路径为https://gitee.com/mirrors/linux_old1 ；我当前使用Linux官方最新的源码，下载路径为[v6.1-rc6](https://gitee.com/mirrors/linux_old1/repository/archive/v6.1-rc6)。整个仓库带所有Git历史的源码有好几G，如果用git clone的方式拉代码，中间时间比较久，一旦中间网络中断，则无法恢复，需要重新clone；推荐直接下载zip压缩包，这样只有250M。
   * （当前不使用）树莓派官方提供了从Linux kernel中派生的源码，但是版本比kernel官方低很多，路径为https://github.com/raspberrypi/linux 。
+  * 编译好的zImage和vexpress-v2p-ca9.dtb文件我已经放在另一个仓库中，地址为：[https://gitee.com/langcai1943/linux_kernel_u-boot_busybox_code_comments/tree/develop/bin/v1.0.0](https://gitee.com/langcai1943/linux_kernel_u-boot_busybox_code_comments/tree/develop/bin/v1.0.0)
 
 * Ubuntu主机和交叉编译工具可以直接用上面U-Boot同样的环境，下面介绍的是32位Ubuntu16.04下使用的交叉编译工具；Linux kernel在此环境下也能编译通过。
 
@@ -788,8 +792,15 @@ ing default environment
   * 如果用Linux官方的kernel源码，则不能使用树莓派的交叉编译工具：
     * Linux kernel源码的下载路径：https://gitee.com/mirrors/linux_old1/tree/v6.1-rc4
     * 先在Linux系统环境中修改芯片类型和编译器名称：
-    * export ARCH=arm
-    * export CROSS_COMPILE=arm-linux-gnueabihf-
+
+```shell
+# 因为我当前不编译Linux PC下的程序，所以我直接将整个环境都配成交叉编译的
+export ARCH=arm
+export CROSS_COMPILE=arm-none-linux-gnueabihf-
+# 增加交叉编译器的路径，修改成你自己解压的路径
+export PATH=$PATH:/home/jim/Desktop/tools/arm-gnu-toolchain/bin
+```
+
     * 再 make bcm2835_defconfig
     * 当前Linux kernel源码要求最低的gcc版本为Minimum GCC version: 5.1.0，而树莓派提供的版本为4.8.3，版本太低。
   * （不使用）ARM官网的交叉编译工具，当前只支持64位主机下的软件：https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
@@ -808,8 +819,17 @@ ing default environment
 ---
 
 * 下面是在64位Ubuntu 18.04中编译Linux kernel的步骤
-* 编译好的zImage和vexpress-v2p-ca9.dtb文件放在本仓库根目录/linux/文件夹下，可以直接运行查看效果
+  * 编译好的zImage和vexpress-v2p-ca9.dtb文件我已经放在另一个仓库中，地址为：[https://gitee.com/langcai1943/linux_kernel_u-boot_busybox_code_comments/tree/develop/bin/v1.0.0](https://gitee.com/langcai1943/linux_kernel_u-boot_busybox_code_comments/tree/develop/bin/v1.0.0)
 * 交叉编译环境保持和上面编译U-Boot时相同
+
+```shell
+# 因为我当前不编译Linux PC下的程序，所以我直接将整个环境都配成交叉编译的
+export ARCH=arm
+export CROSS_COMPILE=arm-none-linux-gnueabihf-
+# 增加交叉编译器的路径，修改成你自己解压的路径
+export PATH=$PATH:/home/jim/Desktop/tools/arm-gnu-toolchain/bin
+```
+
 * 下载最新的Linux kernel源码：[v6.1-rc4](https://gitee.com/mirrors/linux_old1/repository/archive/v6.1-rc6)
 
 * 编译：
@@ -823,7 +843,7 @@ ing default environment
 * 运行：
   * qemu-system-arm -M vexpress-a9 -m 256M -nographic -kernel zImage -dtb vexpress-v2p-ca9.dtb
   * 能正常运行，但是会提示没有文件系统
-  * 编译好的zImage和vexpress-v2p-ca9.dtb文件我已经放在另一个仓库中，地址为：https://gitee.com/langcai1943/linux_kernel_u-boot_busybox_code_comments/bin/v1.0.0
+  * 编译好的zImage和vexpress-v2p-ca9.dtb文件我已经放在另一个仓库中，地址为：[https://gitee.com/langcai1943/linux_kernel_u-boot_busybox_code_comments/tree/develop/bin/v1.0.0](https://gitee.com/langcai1943/linux_kernel_u-boot_busybox_code_comments/tree/develop/bin/v1.0.0)
 * 运行效果：
 ```shell
 jim@DESKTOP-SVP3BEM MSYS /d/1_git/cj-security-camera/linux
@@ -861,7 +881,7 @@ CPU: All CPU(s) started in SVC mode.
 
 ---
 
-#### 2、Busybox生成文件系统需要的系统应用程序和制作根文件系统
+#### 3、Busybox生成文件系统需要的系统应用程序和制作根文件系统
 
 * MSYS2中的QEMU不能引导文件系统（未尝试去查找解决该问题），在Linux下运行QEMU能正常引导。
   * 在Ubuntu下安装QEMU：sudo apt install qemu-system-arm
@@ -873,8 +893,15 @@ CPU: All CPU(s) started in SVC mode.
 * 10.2版本编译器ARM官方下载地址：[gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf.tar.xz](https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf.tar.xz)
   * 解压后需要重新输出编译器路径：
 
+* 交叉编译环境的配置方法和上面编译U-Boot时相同
+
 ```shell
-export PATH=$PATH:/home/jim/Desktop/tools/gcc-arm-10.2/bin ，并重新注销或者重启Ubuntu
+# 因为我当前不编译Linux PC下的程序，所以我直接将整个环境都配成交叉编译的
+export ARCH=arm
+export CROSS_COMPILE=arm-none-linux-gnueabihf-
+# 增加交叉编译器的路径，修改成你自己解压的路径
+export PATH=$PATH:/home/jim/Desktop/tools/gcc-arm-10.2/bin
+# 如果之前以及输出了别的版本gcc的路径，则需重新注销或者重启Ubuntu后再执行上面的步骤
 ```
 
 * 编译：
@@ -959,7 +986,7 @@ sudo umount my_mnt
 
 * 将生成的rootfs.img拷贝Ubuntu桌面
 * 将之前的u-boot和vexpress-v2p-ca9.dtb拷贝到Ubuntu桌面
-* 编译好的rootfs.img、zImage和vexpress-v2p-ca9.dtb文件我已经放在另一个仓库中，地址为：https://gitee.com/langcai1943/linux_kernel_u-boot_busybox_code_comments/bin/v1.0.0
+* 编译好的rootfs.img、zImage和vexpress-v2p-ca9.dtb文件我已经放在另一个仓库中，地址为：[https://gitee.com/langcai1943/linux_kernel_u-boot_busybox_code_comments/tree/develop/bin/v1.0.0](https://gitee.com/langcai1943/linux_kernel_u-boot_busybox_code_comments/tree/develop/bin/v1.0.0)
 * 在Ubuntu桌面上打开终端
 * 在Ubuntu终端中执行 qemu-system-arm -M vexpress-a9 -m 256M -nographic -kernel zImage -dtb vexpress-v2p-ca9.dtb -sd rootfs.img -append "root=/dev/mmcblk0 rw console=ttyAMA0" 
 * 可以看到效果：
